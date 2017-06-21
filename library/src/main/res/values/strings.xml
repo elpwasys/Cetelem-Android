@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Library</string>
+    <string name="http_error_io">Não foi possível estabelecer comunicação com o servidor. Tente novamente mais tarde.</string>
+    <string name="http_error_timeout">O tempo limite de conexão com o servidor esgotou.</string>
+</resources>

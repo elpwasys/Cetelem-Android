@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Cetelem</string>
+    <string name="title_activity_main">@string/app_name</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Configurações</string>
+    <string name="user_login">Login do usuário</string>
+    <string name="email">E-mail</string>
+    <string name="password">Senha</string>
+    <string name="enter">Entrar</string>
+    <string name="user">USER</string>
+    <string name="admin">Admin</string>
+    <string name="network_not_available">Internet indisponível</string>
+    <string name="app">App</string>
+    <string name="exit">Sair</string>
+
+    <string name="faca_seu_login">Faça seu login.</string>
+    <string name="senha">Senha</string>
+    <string name="entrar">Entrar</string>
+    <string name="saudacao_login">Bem-vindo ao Cetelem</string>
+    <string name="msg_required_field">%1$s é obrigatório</string>
+    <string name="usuario">Usuário</string>
+
+</resources>
