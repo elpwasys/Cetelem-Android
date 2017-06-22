@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.widget.EditText;
 
+import com.todobom.opennotescanner.OpenNoteScannerActivity;
+
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.wasys.cetelem.R;
@@ -39,12 +41,16 @@ public class LoginActivity extends CetelemActivity {
 
     @OnClick(R.id.button_entrar)
     public void onEntrarPressed() {
+        Intent intent = new Intent(this, OpenNoteScannerActivity.class);
+        startActivity(intent);
+        /*
         CredencialModel model = validar();
         if (model != null) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
         }
+        */
     }
 
     private CredencialModel validar() {

@@ -1,0 +1,14 @@
+<resources>
+    <string name="answer_cancel">Cancelar</string>
+    <string name="downloading">Baixando</string>
+    <string name="downloading_opencv">Baixando OpenCV Manager</string>
+    <string name="install_opencv">Instalar OpenCV Manager</string>
+    <string name="scanningToast">Buscando documento\nClique novamente para capturar imagem inteira</string>
+    <string name="colorMode">Modo em cores</string>
+    <string name="bwMode"><![CDATA[Modo preto & branco]]></string>
+    <string name="ask_install_opencv">Para funcionar o Open Note Scanner precisa dos serviços do OpenCV Manager, que não está instalado ainda.</string>
+    <string name="googleplay">Google Play</string>
+    <string name="githubdownload">Download direto</string>
+    <string name="activateunknown">Ir a Configurações</string>
+    <string name="messageactivateunknown">Google Play não está disponível e a instalação a partir de fontes desconhecidas está desativada, por favor vá até a tela de Configurações para ativá-la</string>
+</resources>

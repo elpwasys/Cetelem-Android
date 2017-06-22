@@ -3,12 +3,12 @@ apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 23
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "br.com.wasys.cetelem"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -36,7 +36,8 @@ dependencies {
     compile project(':library')
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
     compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:design:23.3.0'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    compile project(':opennotescanner')
 }
