@@ -9,11 +9,12 @@ import io.realm.RealmConfiguration;
  */
 public class Application extends br.com.wasys.library.Application {
 
-    private static final String TOKEN_PREFERENCES_KEY = Application.class.getName() + ".token";
+    private static Application instance;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         Realm.init(this);
         RealmConfiguration configuration = new RealmConfiguration.Builder()
                 .name("data.realm")
@@ -21,11 +22,7 @@ public class Application extends br.com.wasys.library.Application {
         Realm.setDefaultConfiguration(configuration);
     }
 
-    public static String getToken() {
-        return PreferencesUtils.get(TOKEN_PREFERENCES_KEY);
-    }
-
-    public static void setAuthorization(String authorization) {
-        PreferencesUtils.put(TOKEN_PREFERENCES_KEY, authorization);
+    public static Application getInstance() {
+        return instance;
     }
 }

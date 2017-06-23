@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
+
+import java.util.UUID;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.library.utils.PreferencesUtils;
 
 public class SplashActivity extends CetelemActivity {
 
@@ -29,7 +31,7 @@ public class SplashActivity extends CetelemActivity {
     }
 
     private void start() {
-        startActivity(LoginActivity.create(this));
+        startActivity(LoginActivity.newIntent(this));
         finish();
     }
 }

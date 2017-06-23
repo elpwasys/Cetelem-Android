@@ -7,4 +7,9 @@ public class CredencialModel {
 
     public String login;
     public String senha;
+
+    public CredencialModel(String login, String senha) {
+        this.login = login;
+        this.senha = senha;
+    }
 }

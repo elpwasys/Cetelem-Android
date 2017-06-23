@@ -1,5 +1,7 @@
 package br.com.wasys.cetelem.activity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,6 +19,10 @@ import br.com.wasys.cetelem.R;
 
 public class MainActivity extends CetelemActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static Intent newIntent(Context context) {
+        return new Intent(context, MainActivity.class);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

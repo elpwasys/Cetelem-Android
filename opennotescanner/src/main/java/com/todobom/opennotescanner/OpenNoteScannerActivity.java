@@ -16,7 +16,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -69,6 +68,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -168,6 +168,12 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
     private boolean attemptToFocus = false;
     private boolean imageProcessorBusy = true;
+
+    public static Intent newIntent(Context context, Uri uri) {
+        Intent intent = new Intent(context, OpenNoteScannerActivity.class);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -823,31 +829,15 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         String fileName;
-        boolean isIntent = false;
-        Uri fileUri = null;
-        if (intent.getAction().equals("android.media.action.IMAGE_CAPTURE")) {
-            fileUri = ((Uri) intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT));
-            Log.d(TAG,"intent uri: " + fileUri.toString());
-            try {
-                fileName = File.createTempFile("onsFile",".jpg", this.getCacheDir()).getPath();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-            isIntent = true;
-        } else {
-            String folderName=mSharedPref.getString("storage_folder","OpenNoteScanner");
-            File folder = new File(Environment.getExternalStorageDirectory().toString()
-                    + "/" + folderName );
-            if (!folder.exists()) {
-                folder.mkdirs();
-                Log.d(TAG, "wrote: created folder "+folder.getPath());
-            }
-            fileName = Environment.getExternalStorageDirectory().toString()
-                    + "/" + folderName + "/DOC-"
-                    + new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date())
-                    + ".jpg";
+        Uri fileUri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+        Log.d(TAG,"intent uri: " + fileUri.toString());
+        try {
+            fileName = File.createTempFile("ons-file",".jpg", this.getCacheDir()).getPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
+
         Mat endDoc = new Mat(Double.valueOf(doc.size().width).intValue(),
                 Double.valueOf(doc.size().height).intValue(), CvType.CV_8UC4);
 
@@ -868,45 +858,37 @@ public class OpenNoteScannerActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-        if (isIntent) {
-            InputStream inputStream = null;
-            OutputStream realOutputStream = null;
+        InputStream inputStream = null;
+        OutputStream realOutputStream = null;
+        try {
+            inputStream = new FileInputStream(fileName);
+            realOutputStream = this.getContentResolver().openOutputStream(fileUri);
+            // Transfer bytes from in to out
+            byte [] buffer = new byte[1024];
+            int len;
+            while( (len = inputStream.read(buffer)) > 0 ) {
+                realOutputStream.write(buffer, 0, len);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        } finally {
             try {
-                inputStream = new FileInputStream(fileName);
-                realOutputStream = this.getContentResolver().openOutputStream(fileUri);
-                // Transfer bytes from in to out
-                byte [] buffer = new byte[1024];
-                int len;
-                while( (len = inputStream.read(buffer)) > 0 ) {
-                    realOutputStream.write(buffer, 0, len);
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return;
+                inputStream.close();
+                realOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
-            } finally {
-                try {
-                    inputStream.close();
-                    realOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
-
         }
 
         Log.d(TAG, "wrote: " + fileName);
 
-        if (isIntent) {
-            new File(fileName).delete();
-            setResult(RESULT_OK, intent);
-            finish();
-        } else {
-            animateDocument(fileName,scannedDocument);
-            //addImageToGallery(fileName , this);
-        }
+        new File(fileName).delete();
+        setResult(RESULT_OK, intent);
+        finish();
 
         refreshCamera();
 
