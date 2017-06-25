@@ -36,8 +36,11 @@ public class Endpoint {
         headers.put(DeviceHeader.DEVICE_HEIGHT.key, String.valueOf(AndroidUtils.getHeightPixels(context)));
         headers.put(DeviceHeader.DEVICE_APP_VERSION.key, String.valueOf(AndroidUtils.getVersionCode(context)));
         Dispositivo dispositivo = Dispositivo.current();
-        if (dispositivo != null && StringUtils.isNotBlank(dispositivo.token)) {
-            headers.put(DeviceHeader.DEVICE_TOKEN.key, dispositivo.token);
+        if (dispositivo != null) {
+            String token = dispositivo.getToken();
+            if (StringUtils.isNotBlank(token)) {
+                headers.put(DeviceHeader.DEVICE_TOKEN.key, token);
+            }
         }
         return br.com.wasys.library.http.Endpoint.create(clazz, BASE_URL, headers);
     }

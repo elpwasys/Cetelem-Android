@@ -20,5 +20,33 @@
     <string name="saudacao_login">Bem-vindo ao Cetelem</string>
     <string name="msg_required_field">%1$s é obrigatório</string>
     <string name="usuario">Usuário</string>
+    <string name="processo">Processo</string>
+    <string name="novo">Novo</string>
+    <string name="pesquisar">Pesquisar</string>
+    <string name="applicativo">Aplicativo</string>
+    <string name="sair">Sair</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+    <string name="msg_sair_conta">Deseja sair da conta?</string>
+
+    <string name="status_processo_rascunho">Rascunho</string>
+    <string name="status_processo_aguardando_analise">Aguardando Análise</string>
+    <string name="status_processo_em_analise">Em Análise</string>
+    <string name="status_processo_pendente">Pendente</string>
+    <string name="status_processo_em_acompanhamento">Em Acompanhamento</string>
+    <string name="status_processo_concluido">Concluído</string>
+    <string name="status_processo_cancelado">Cancelado</string>
+    <string name="tipo_processo">Tipo de processo</string>
+
+    <string-array name="planets_array">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
 
 </resources>

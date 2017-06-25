@@ -1,21 +1,28 @@
 package br.com.wasys.cetelem.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
+import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
+import br.com.wasys.cetelem.Usuario;
+import br.com.wasys.cetelem.fragment.ProcessoCadastroFragment;
+import br.com.wasys.library.utils.FieldUtils;
+import br.com.wasys.library.utils.FragmentUtils;
+import butterknife.ButterKnife;
 
 public class MainActivity extends CetelemActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -39,6 +46,21 @@ public class MainActivity extends CetelemActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Usuario usuario = Usuario.current();
+        if (usuario != null) {
+            View headerView = navigationView.getHeaderView(0);
+            // USUARIO NOME
+            TextView nomeTextView = ButterKnife.findById(headerView, R.id.usuario_nome);
+            String nome = usuario.getNome();
+            FieldUtils.setText(nomeTextView, nome);
+            // USUARIO EMAIL
+            String email = usuario.getEmail();
+            TextView emailTextView = ButterKnife.findById(headerView, R.id.usuario_email);
+            FieldUtils.setText(emailTextView, email);
+        }
+
+        //drawer.openDrawer(GravityCompat.START);
     }
 
     @Override
@@ -47,7 +69,13 @@ public class MainActivity extends CetelemActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            FragmentManager manager = getSupportFragmentManager();
+            if (manager.getBackStackEntryCount() < 2) {
+                drawer.openDrawer(GravityCompat.START);
+            }
+            else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -79,22 +107,40 @@ public class MainActivity extends CetelemActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_plus) {
+            ProcessoCadastroFragment fragment = ProcessoCadastroFragment.newInstance();
+            FragmentUtils.replace(this, R.id.content_main, fragment, "Processo.Cadastro", true);
+        } else if (id == R.id.nav_search) {
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_power) {
+            sair();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void sair() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.sair);
+        builder.setMessage(R.string.msg_sair_conta);
+        builder.setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Dispositivo.clear();
+                Intent intent = SplashActivity.newIntent(MainActivity.this);
+                startActivity(intent);
+                finish();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

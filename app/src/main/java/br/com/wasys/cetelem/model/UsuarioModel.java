@@ -8,7 +8,6 @@ import br.com.wasys.library.model.Model;
 
 public class UsuarioModel extends Model {
 
-    public Long id;
     public String nome;
     public String email;
 }

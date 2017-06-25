@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import br.com.wasys.library.widget.Progress;
 import rx.Observable;
@@ -105,6 +106,11 @@ public abstract class AppActivity extends AppCompatActivity {
             mLooper = mHandlerThread.getLooper();
         }
         return mLooper;
+    }
+
+    protected void handle(Throwable throwable) {
+        throwable.printStackTrace();
+        Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
     protected boolean grantedResults(int[] grantResults) {

@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
+
 /**
  * Created by pascke on 02/08/16.
  */
@@ -35,5 +37,38 @@ public class FieldUtils {
             value = TypeUtils.parse(clazz, text);
         }
         return value;
+    }
+
+    public static void setText(TextView textView, Object value) {
+        if (value == null) {
+            textView.setText(null);
+        }
+        else {
+            if (value instanceof Date) {
+                textView.setText(DateUtils.format((Date) value, DateUtils.DateType.DATE_BR.getPattern()));
+            }
+            else if (value instanceof Double) {
+                textView.setText(NumberUtils.format((Double) value));
+            }
+            else {
+                String text = String.valueOf(value);
+                if (StringUtils.isNotBlank(text)) {
+                    textView.setText(text);
+                }
+            }
+        }
+    }
+
+    public static void setText(EditText editText, String value) {
+        setText((TextView) editText, value);
+    }
+
+    public static void setText(TextView textView, Date value, DateUtils.DateType dateType) {
+        if (value == null) {
+            textView.setText(null);
+        }
+        else {
+            textView.setText(DateUtils.format((Date) value, dateType.getPattern()));
+        }
     }
 }

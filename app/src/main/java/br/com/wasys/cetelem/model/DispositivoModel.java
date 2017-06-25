@@ -8,7 +8,6 @@ import br.com.wasys.library.model.Model;
 
 public class DispositivoModel extends Model {
 
-    public Long id;
     public String token;
     public String pushToken;
 

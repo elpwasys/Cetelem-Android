@@ -46,6 +46,7 @@
                 android:drawablePadding="@dimen/default_padding"
                 android:drawableTint="@color/editTextColor"
                 android:hint="@string/usuario"
+                android:inputType="textNoSuggestions"
                 />
         </android.support.design.widget.TextInputLayout>
         <android.support.design.widget.TextInputLayout

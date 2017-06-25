@@ -8,6 +8,7 @@ import android.provider.Settings;
 
 import java.util.UUID;
 
+import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
 
 public class SplashActivity extends CetelemActivity {
@@ -31,7 +32,14 @@ public class SplashActivity extends CetelemActivity {
     }
 
     private void start() {
-        startActivity(LoginActivity.newIntent(this));
+        Intent intent;
+        Dispositivo dispositivo = Dispositivo.current();
+        if (dispositivo != null) {
+            intent = MainActivity.newIntent(this);
+        } else {
+            intent = LoginActivity.newIntent(this);
+        }
+        startActivity(intent);
         finish();
     }
 }

@@ -7,8 +7,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 
@@ -131,11 +133,15 @@ public class LoginActivity extends CetelemActivity {
             }
             @Override
             public void onError(Throwable e) {
-
+                hideProgress();
+                handle(e);
             }
             @Override
             public void onNext(DispositivoModel dispositivoModel) {
-                new Dispositivo(dispositivoModel.id, dispositivoModel.token);
+                Dispositivo.from(dispositivoModel);
+                Intent intent = MainActivity.newIntent(LoginActivity.this);
+                startActivity(intent);
+                finish();
             }
         });
     }
