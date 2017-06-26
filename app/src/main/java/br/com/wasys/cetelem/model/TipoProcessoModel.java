@@ -9,10 +9,10 @@ import br.com.wasys.library.widget.AppSpinner;
 
 public class TipoProcessoModel extends Model implements AppSpinner.Option {
 
-    public Long id;
     public String nome;
 
     public TipoProcessoModel() {
+
     }
 
     public TipoProcessoModel(Long id) {

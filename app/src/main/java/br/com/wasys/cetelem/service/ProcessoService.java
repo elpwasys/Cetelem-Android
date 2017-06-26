@@ -1,13 +1,12 @@
 package br.com.wasys.cetelem.service;
 
-import java.util.List;
-
+import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
+import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.endpoint.ProcessoEndpoint;
-import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
-import br.com.wasys.cetelem.tela.Tela;
-import br.com.wasys.cetelem.tela.metadata.ProcessoMetadata;
+import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.library.service.Service;
 import retrofit2.Call;
 import rx.Observable;
@@ -25,18 +24,18 @@ public class ProcessoService extends Service {
         return model;
     }
 
-    public static List<CampoGrupoModel> listarCampos(Long id) throws Throwable {
+    public static DataSet<ProcessoModel, ProcessoMeta> getDataSet() throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<List<CampoGrupoModel>> call = endpoint.listar(id);
-        List<CampoGrupoModel> models = Endpoint.execute(call);
-        return models;
+        Call<DataSet<ProcessoModel, ProcessoMeta>> call = endpoint.getDataSet();
+        DataSet<ProcessoModel, ProcessoMeta> dataSet = Endpoint.execute(call);
+        return dataSet;
     }
 
-    public static Tela<ProcessoModel, ProcessoMetadata> cadastrar() throws Throwable {
+    public static DataSet<TipoProcessoModel, TipoProcessoMeta> getTipoDataSet(Long id) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<Tela<ProcessoModel, ProcessoMetadata>> call = endpoint.cadastrar();
-        Tela<ProcessoModel, ProcessoMetadata> tela = Endpoint.execute(call);
-        return tela;
+        Call<DataSet<TipoProcessoModel, TipoProcessoMeta>> call = endpoint.getTipoDataSet(id);
+        DataSet<TipoProcessoModel, TipoProcessoMeta> dataSet = Endpoint.execute(call);
+        return dataSet;
     }
 
     public static class Async {
@@ -56,13 +55,13 @@ public class ProcessoService extends Service {
             });
         }
 
-        public static Observable<List<CampoGrupoModel>> listarCampos(final Long id) {
-            return Observable.create(new Observable.OnSubscribe<List<CampoGrupoModel>>() {
+        public static Observable<DataSet<ProcessoModel, ProcessoMeta>> getDataSet() {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoMeta>>() {
                 @Override
-                public void call(Subscriber<? super List<CampoGrupoModel>> subscriber) {
+                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoMeta>> subscriber) {
                     try {
-                        List<CampoGrupoModel> models = ProcessoService.listarCampos(id);
-                        subscriber.onNext(models);
+                        DataSet<ProcessoModel, ProcessoMeta> dataSet = ProcessoService.getDataSet();
+                        subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);
@@ -71,13 +70,13 @@ public class ProcessoService extends Service {
             });
         }
 
-        public static Observable<Tela<ProcessoModel, ProcessoMetadata>> cadastrar() {
-            return Observable.create(new Observable.OnSubscribe<Tela<ProcessoModel, ProcessoMetadata>>() {
+        public static Observable<DataSet<TipoProcessoModel, TipoProcessoMeta>> getTipoDataSet(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<TipoProcessoModel, TipoProcessoMeta>>() {
                 @Override
-                public void call(Subscriber<? super Tela<ProcessoModel, ProcessoMetadata>> subscriber) {
+                public void call(Subscriber<? super DataSet<TipoProcessoModel, TipoProcessoMeta>> subscriber) {
                     try {
-                        Tela<ProcessoModel, ProcessoMetadata> tela = ProcessoService.cadastrar();
-                        subscriber.onNext(tela);
+                        DataSet<TipoProcessoModel, TipoProcessoMeta> dataSet = ProcessoService.getTipoDataSet(id);
+                        subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);

@@ -1,11 +1,10 @@
 package br.com.wasys.cetelem.endpoint;
 
-import java.util.List;
-
-import br.com.wasys.cetelem.model.CampoGrupoModel;
+import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
+import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.model.ProcessoModel;
-import br.com.wasys.cetelem.tela.Tela;
-import br.com.wasys.cetelem.tela.metadata.ProcessoMetadata;
+import br.com.wasys.cetelem.model.TipoProcessoModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -17,11 +16,11 @@ import retrofit2.http.Path;
  */
 public interface ProcessoEndpoint {
 
-    @GET("processo/cadastrar")
-    Call<Tela<ProcessoModel, ProcessoMetadata>> cadastrar();
+    @GET("processo/dataset")
+    Call<DataSet<ProcessoModel, ProcessoMeta>> getDataSet();
 
-    @GET("processo/campo/listar/{id}")
-    Call<List<CampoGrupoModel>> listar(@Path("id") Long id);
+    @GET("processo/tipo/dataset/{id}")
+    Call<DataSet<TipoProcessoModel, TipoProcessoMeta>> getTipoDataSet(@Path("id") Long id);
 
     @POST("processo/salvar")
     Call<ProcessoModel> salvar(@Body ProcessoModel processoModel);

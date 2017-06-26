@@ -68,7 +68,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -168,12 +167,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
     private boolean attemptToFocus = false;
     private boolean imageProcessorBusy = true;
-
-    public static Intent newIntent(Context context, Uri uri) {
-        Intent intent = new Intent(context, OpenNoteScannerActivity.class);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        return intent;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,18 +1,13 @@
 package br.com.wasys.cetelem.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-
-import java.io.File;
 
 import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
@@ -50,50 +45,8 @@ public class LoginActivity extends CetelemActivity {
         AndroidUtils.requestFocus(mLoginEditText, true);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_IMAGE_CAPTURE: {
-
-                    break;
-                }
-            }
-        }
-        else if (resultCode == Activity.RESULT_CANCELED) {
-            File file = new File(mUri.getPath());
-            if (file.exists()) {
-                file.delete();
-            }
-            mUri = null;
-        }
-    }
-
     @OnClick(R.id.button_entrar)
     public void onEntrarPressed() {
-        /*
-        if (AndroidUtils.isExternalStorageWritable()) {
-            String applicationId = BuildConfig.APPLICATION_ID;
-            File storage = new File(Environment.getExternalStorageDirectory(), applicationId);
-            if (!storage.exists()) {
-                storage.mkdirs();
-            }
-            Date date = new Date();
-            String name = DateUtils.format(date, "yyyyMMdd_HHmmss'.jpg'");
-            String path = storage.getAbsolutePath() + File.separator + name;
-            File file = new File(path);
-            try {
-                file.createNewFile();
-                if (file != null) {
-                    mUri = Uri.fromFile(file);
-                    Intent intent = OpenNoteScannerActivity.newIntent(this, mUri);
-                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        */
         boolean valid = isValid();
         if (valid) {
             autenticar();
