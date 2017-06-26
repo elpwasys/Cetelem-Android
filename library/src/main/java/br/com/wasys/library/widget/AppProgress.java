@@ -15,9 +15,9 @@ import br.com.wasys.library.R;
 /**
  * Created by pascke on 03/09/16.
  */
-public class Progress extends Dialog {
+public class AppProgress extends Dialog {
 
-    public Progress(Context context) {
+    public AppProgress(Context context) {
         super(context, R.style.Library_Progress);
         WindowManager.LayoutParams attributes = getWindow().getAttributes();
         attributes.gravity = Gravity.CENTER_HORIZONTAL;

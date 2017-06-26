@@ -12,13 +12,13 @@ import android.view.WindowManager;
  * Created by pascke on 20/09/16.
  */
 
-public class AlertDialog extends Dialog {
+public class AppAlertDialog extends Dialog {
 
     private int mIcon;
     private String mTitle;
     private String mMessage;
 
-    private AlertDialog(Builder builder) {
+    private AppAlertDialog(Builder builder) {
         super(builder.context);
         mIcon = builder.icon;
         mTitle = builder.title;
@@ -60,8 +60,8 @@ public class AlertDialog extends Dialog {
         public Builder message(@StringRes int message) {
             return message(context.getString(message));
         }
-        public AlertDialog build() {
-            return new AlertDialog(this);
+        public AppAlertDialog build() {
+            return new AppAlertDialog(this);
         }
     }
 }

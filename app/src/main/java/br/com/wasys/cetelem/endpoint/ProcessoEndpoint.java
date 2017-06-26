@@ -7,7 +7,9 @@ import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.tela.Tela;
 import br.com.wasys.cetelem.tela.metadata.ProcessoMetadata;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 /**
@@ -20,4 +22,7 @@ public interface ProcessoEndpoint {
 
     @GET("processo/campo/listar/{id}")
     Call<List<CampoGrupoModel>> listar(@Path("id") Long id);
+
+    @POST("processo/salvar")
+    Call<ProcessoModel> salvar(@Body ProcessoModel processoModel);
 }

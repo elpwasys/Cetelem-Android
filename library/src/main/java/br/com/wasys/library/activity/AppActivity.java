@@ -11,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import br.com.wasys.library.widget.Progress;
+import br.com.wasys.library.widget.AppProgress;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -21,7 +21,7 @@ import rx.android.schedulers.AndroidSchedulers;
 public abstract class AppActivity extends AppCompatActivity {
 
     private Looper mLooper;
-    private Progress mProgress;
+    private AppProgress mProgress;
     private HandlerThread mHandlerThread;
 
     public String getTag() {
@@ -78,7 +78,7 @@ public abstract class AppActivity extends AppCompatActivity {
 
     protected void showProgress() {
         if (mProgress == null) {
-            mProgress = new Progress(this);
+            mProgress = new AppProgress(this);
         }
         Log.i(getTag(), "Showing progress...");
         mProgress.show();

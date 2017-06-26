@@ -18,7 +18,14 @@ import rx.Subscriber;
  */
 public class ProcessoService extends Service {
 
-    public static List<CampoGrupoModel> listar(Long id) throws Throwable {
+    public static ProcessoModel salvar(ProcessoModel processoModel) throws Throwable {
+        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
+        Call<ProcessoModel> call = endpoint.salvar(processoModel);
+        ProcessoModel model = Endpoint.execute(call);
+        return model;
+    }
+
+    public static List<CampoGrupoModel> listarCampos(Long id) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
         Call<List<CampoGrupoModel>> call = endpoint.listar(id);
         List<CampoGrupoModel> models = Endpoint.execute(call);
@@ -33,12 +40,28 @@ public class ProcessoService extends Service {
     }
 
     public static class Async {
-        public static Observable<List<CampoGrupoModel>> listar(final Long id) {
+
+        public static Observable<ProcessoModel> salvar(final ProcessoModel processoModel) {
+            return Observable.create(new Observable.OnSubscribe<ProcessoModel>() {
+                @Override
+                public void call(Subscriber<? super ProcessoModel> subscriber) {
+                    try {
+                        ProcessoModel model = ProcessoService.salvar(processoModel);
+                        subscriber.onNext(model);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+
+        public static Observable<List<CampoGrupoModel>> listarCampos(final Long id) {
             return Observable.create(new Observable.OnSubscribe<List<CampoGrupoModel>>() {
                 @Override
                 public void call(Subscriber<? super List<CampoGrupoModel>> subscriber) {
                     try {
-                        List<CampoGrupoModel> models = ProcessoService.listar(id);
+                        List<CampoGrupoModel> models = ProcessoService.listarCampos(id);
                         subscriber.onNext(models);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
@@ -47,6 +70,7 @@ public class ProcessoService extends Service {
                 }
             });
         }
+
         public static Observable<Tela<ProcessoModel, ProcessoMetadata>> cadastrar() {
             return Observable.create(new Observable.OnSubscribe<Tela<ProcessoModel, ProcessoMetadata>>() {
                 @Override

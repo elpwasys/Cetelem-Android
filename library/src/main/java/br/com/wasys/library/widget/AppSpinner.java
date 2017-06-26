@@ -26,7 +26,7 @@ import br.com.wasys.library.R;
  * Created by pascke on 24/06/17.
  */
 
-public class Spinner extends AppCompatAutoCompleteTextView implements AdapterView.OnItemClickListener {
+public class AppSpinner extends AppCompatAutoCompleteTextView implements AdapterView.OnItemClickListener {
 
     private boolean mIsPopup;
     private long mStartClickTime;
@@ -37,17 +37,17 @@ public class Spinner extends AppCompatAutoCompleteTextView implements AdapterVie
     private List<? extends Option> options;
     private OnOptionClickListener mOnOptionClickListener;
 
-    public Spinner(Context context) {
+    public AppSpinner(Context context) {
         super(context);
         configuration(context);
     }
 
-    public Spinner(Context context, AttributeSet attrs) {
+    public AppSpinner(Context context, AttributeSet attrs) {
         super(context, attrs);
         configuration(context);
     }
 
-    public Spinner(Context context, AttributeSet attrs, int defStyleAttr) {
+    public AppSpinner(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         configuration(context);
     }

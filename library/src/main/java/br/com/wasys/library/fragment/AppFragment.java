@@ -10,7 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import br.com.wasys.library.widget.Progress;
+import br.com.wasys.library.widget.AppProgress;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -20,7 +20,7 @@ import rx.android.schedulers.AndroidSchedulers;
 public abstract class AppFragment extends Fragment implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private Looper mLooper;
-    private Progress mProgress;
+    private AppProgress mProgress;
     private HandlerThread mHandlerThread;
 
     protected Context getBaseContext() {
@@ -34,7 +34,7 @@ public abstract class AppFragment extends Fragment implements ActivityCompat.OnR
 
     protected void showProgress() {
         if (mProgress == null) {
-            mProgress = new Progress(getActivity());
+            mProgress = new AppProgress(getActivity());
         }
         Log.i(getTag2(), "Showing progress...");
         mProgress.show();
