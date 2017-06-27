@@ -3,10 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_scan"
-        android:icon="@drawable/ic_camera_white"
-        android:title="@string/action_settings"
-
+        android:icon="@drawable/ic_bar_camera"
+        android:title="@string/action_escanear"
         app:showAsAction="always"
-
         />
 </menu>

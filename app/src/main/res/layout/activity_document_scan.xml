@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/black"
     tools:context="br.com.wasys.cetelem.activity.DocumentScanActivity">
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,7 +14,8 @@
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:padding="@dimen/activity_padding"/>
         <com.viewpagerindicator.CirclePageIndicator
             android:id="@+id/indicator"
             android:layout_width="match_parent"
@@ -21,4 +23,18 @@
             app:fillColor="@color/colorPrimary"
             app:strokeColor="@color/colorPrimary"/>
     </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/button_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginLeft="@dimen/fab_margin"
+        android:layout_marginBottom="32dp"
+        android:src="@drawable/ic_delete"
+        android:tint="@android:color/holo_red_dark"
+        android:visibility="gone"
+        app:fabSize="mini"
+        app:backgroundTint="@android:color/white"/>
 </FrameLayout>

@@ -2,6 +2,7 @@ package br.com.wasys.cetelem.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.ImageUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,6 +49,14 @@ public class DocumentFragment extends Fragment {
         if (bundle != null) {
             mUri = bundle.getParcelable(KEY_URI);
         }
+    }
+
+    @OnClick(R.id.imageView)
+    public void onImageClick() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(mUri, "image/*");
+        startActivity(intent);
     }
 
     @Override

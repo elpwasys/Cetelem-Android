@@ -215,6 +215,17 @@ public class OpenNoteScannerActivity extends AppCompatActivity
             }
         });
 
+        final ImageView backButton = (ImageView) findViewById(R.id.backButton);
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+                refreshCamera();
+            }
+        });
+
         final ImageView colorModeButton = (ImageView) findViewById(R.id.colorModeButton);
 
         colorModeButton.setOnClickListener(new View.OnClickListener() {
@@ -884,7 +895,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         finish();
 
         refreshCamera();
-
     }
 
     class AnimationRunnable implements Runnable {

@@ -19,6 +19,10 @@ public class ScannedDocument {
         this.original = original;
     }
 
+    public Mat getProcessed() {
+        return processed;
+    }
+
     public ScannedDocument setProcessed(Mat processed) {
         this.processed = processed;
         return this;
