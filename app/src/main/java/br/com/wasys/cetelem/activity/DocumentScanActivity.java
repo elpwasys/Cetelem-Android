@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -61,6 +62,14 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
         Intent intent = new Intent(context, DocumentScanActivity.class);
         return intent;
     }
+
+    private Handler handler = new Handler();
+    private Runnable scanRunnable = new Runnable() {
+        @Override
+        public void run() {
+            openScanner();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,8 +229,8 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
                     Uri uri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
                     mUris.add(uri);
                     notifyDataSetChanged();
-                    openScanner();
                     toggleDeleButtonVisible();
+                    handler.postDelayed(scanRunnable, 500);
                     break;
                 }
             }

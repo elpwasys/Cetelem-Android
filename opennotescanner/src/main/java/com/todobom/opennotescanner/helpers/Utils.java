@@ -108,7 +108,7 @@ public class Utils {
         final Point point = new Point();
         try {
             display.getSize(point);
-        } catch (NoSuchMethodError ignore) { // Older device
+        } catch (java.lang.NoSuchMethodError ignore) { // Older device
             point.x = display.getWidth();
             point.y = display.getHeight();
         }

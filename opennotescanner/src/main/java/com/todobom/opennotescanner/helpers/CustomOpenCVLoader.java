@@ -248,7 +248,7 @@ public class CustomOpenCVLoader extends OpenCVLoader {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        AppContext.startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                        AppContext.startActivity(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS));
                     }
                 });
             }

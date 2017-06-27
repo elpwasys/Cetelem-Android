@@ -72,6 +72,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static com.todobom.opennotescanner.helpers.Utils.addImageToGallery;
 import static com.todobom.opennotescanner.helpers.Utils.decodeSampledBitmapFromUri;
 
 /**
@@ -144,6 +145,7 @@ public class OpenNoteScannerActivity extends AppCompatActivity
     private ImageProcessor mImageProcessor;
     private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
+    private OpenNoteScannerActivity mThis;
 
     private boolean mFocused;
     private HUDCanvasView mHud;
@@ -165,12 +167,14 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         this.attemptToFocus = attemptToFocus;
     }
 
+    private boolean imageProcessorBusy=true;
     private boolean attemptToFocus = false;
-    private boolean imageProcessorBusy = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mThis = this;
 
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -216,7 +220,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         });
 
         final ImageView backButton = (ImageView) findViewById(R.id.backButton);
-
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,7 +230,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         });
 
         final ImageView colorModeButton = (ImageView) findViewById(R.id.colorModeButton);
-
         colorModeButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -237,19 +239,20 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
                 sendImageProcessorMessage("colorMode" , colorMode );
 
-                Toast.makeText(getApplicationContext(), colorMode ? R.string.colorMode : R.string.bwMode, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), colorMode? R.string.colorMode: R.string.bwMode, Toast.LENGTH_SHORT).show();
 
             }
         });
 
-        final ImageView flashModeButton = (ImageView) findViewById(R.id.flashModeButton);
 
+        final ImageView flashModeButton = (ImageView) findViewById(R.id.flashModeButton);
         flashModeButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 mFlashMode = setFlash(!mFlashMode);
                 ((ImageView)v).setColorFilter(mFlashMode ? 0xFFFFFFFF : 0xFFA0F0A0);
+
             }
         });
 
@@ -309,7 +312,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
                     MY_PERMISSIONS_REQUEST_WRITE);
 
         }
-
     }
 
 
@@ -428,6 +430,9 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         }
     };
 
+
+
+
     @Override
     public void onResume() {
         super.onResume();
@@ -490,7 +495,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
     private boolean autoMode = false;
     private boolean mFlashMode = false;
 
-
     @Override
     public void onPause() {
         super.onPause();
@@ -548,7 +552,9 @@ public class OpenNoteScannerActivity extends AppCompatActivity
             }
         }
 
-        if (ratioCurrentMaxRes!=null) {
+        boolean matchAspect = mSharedPref.getBoolean("match_aspect", true);
+
+        if (ratioCurrentMaxRes!=null && matchAspect) {
 
             Log.d(TAG,"Max supported picture resolution with preview aspect ratio: "
                     + ratioCurrentMaxRes.width+"x"+ratioCurrentMaxRes.height);
@@ -772,13 +778,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
     private ResetShutterColor resetShutterColor = new ResetShutterColor();
 
-    private Runnable doAutoFocus = new Runnable() {
-        @Override
-        public void run() {
-
-        }
-    };
-
     public boolean requestPicture() {
         if (safeToTakePicture) {
             runOnUiThread(resetShutterColor);
@@ -792,7 +791,7 @@ public class OpenNoteScannerActivity extends AppCompatActivity
                         attemptToFocus = true;
                     }
 
-                    camera.takePicture(null,null,OpenNoteScannerActivity.this);
+                    camera.takePicture(null,null,mThis);
                 }
             });
             return true;
@@ -833,10 +832,12 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         String fileName;
+        boolean isIntent = false;
         Uri fileUri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
         Log.d(TAG,"intent uri: " + fileUri.toString());
+
         try {
-            fileName = File.createTempFile("ons-file",".jpg", this.getCacheDir()).getPath();
+            fileName = File.createTempFile("onsFile",".jpg", this.getCacheDir()).getPath();
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -890,10 +891,10 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
         Log.d(TAG, "wrote: " + fileName);
 
+        //animateDocument(fileName, scannedDocument);
         new File(fileName).delete();
         setResult(RESULT_OK, intent);
         finish();
-
         refreshCamera();
     }
 
@@ -1018,9 +1019,8 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
     private void animateDocument(String filename, ScannedDocument quadrilateral) {
 
-        AnimationRunnable runnable = new AnimationRunnable(filename,quadrilateral);
+        AnimationRunnable runnable = new AnimationRunnable(filename, quadrilateral);
         runOnUiThread(runnable);
-
     }
 
     private void shootSound()
@@ -1043,5 +1043,4 @@ public class OpenNoteScannerActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         return false;
     }
-
 }
