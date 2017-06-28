@@ -17,28 +17,33 @@ public class FragmentUtils {
     }
 
     public static void replace(FragmentActivity activity, int id, Fragment fragment) {
-        replace(activity, id, fragment, false);
+        replace(activity, id, fragment, null);
     }
 
-    public static void replace(FragmentActivity activity, int id, Fragment fragment, boolean addToBackStack) {
-        replace(activity, id, fragment, null, addToBackStack);
-    }
-
-    public static void replace(FragmentActivity activity, int id, Fragment fragment, String tag, boolean addToBackStack) {
-        FragmentManager manager = activity.getSupportFragmentManager();
-        if (StringUtils.isNotBlank(tag)) {
-            Fragment fragmentByTag = manager.findFragmentByTag(tag);
-            if (fragmentByTag != null) {
-                return;
-            }
-        }
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(id, fragment, tag);
-        if (addToBackStack) {
-            transaction.addToBackStack(null);
+    public static void replace(FragmentActivity activity, int id, Fragment fragment, String backStackName) {
+        FragmentTransaction transaction = beginTransaction(activity);
+        transaction.replace(id, fragment);
+        if (StringUtils.isNotBlank(backStackName)) {
+            transaction.addToBackStack(backStackName);
         }
         transaction.commit();
     }
+
+    public static boolean popBackStackImmediate(FragmentActivity activity, String backStackName) {
+        FragmentManager manager = activity.getSupportFragmentManager();
+        return manager.popBackStackImmediate(backStackName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    /*private void removeByTag(FragmentActivity activity, String tag) {
+        FragmentManager manager = activity.getSupportFragmentManager();
+        Fragment fragment = manager.findFragmentByTag(tag);
+        manager.popBackStack();
+        if (fragment != null) {
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.remove(fragment);
+            manager.popBackStack();
+        }
+    }*/
 
     private static FragmentTransaction beginTransaction(FragmentActivity activity) {
         FragmentManager manager = activity.getSupportFragmentManager();

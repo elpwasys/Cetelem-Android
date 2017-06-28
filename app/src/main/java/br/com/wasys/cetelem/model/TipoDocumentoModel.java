@@ -10,5 +10,11 @@ public class TipoDocumentoModel extends Model {
 
     public String nome;
     public Integer ordem;
-    public boolean obrigatorio;
+    public Boolean obrigatorio;
+
+    private static final String PREF_KEY_DISPLAY_DOCUMENTS = TipoDocumentoModel.class.getSimpleName();
+
+    public static String getPrefKeyById(Long id) {
+        return PREF_KEY_DISPLAY_DOCUMENTS + "." + id;
+    }
 }

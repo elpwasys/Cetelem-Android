@@ -73,7 +73,7 @@ public class AppCampoGrupoLayout extends LinearLayout {
         params.setMargins(margin, marginTop, margin, margin);
         textView.setLayoutParams(params);
 
-        TextViewCompat.setTextAppearance(textView, android.R.style.TextAppearance_Medium);
+        TextViewCompat.setTextAppearance(textView, android.R.style.TextAppearance_Small);
 
         int color = ResourcesCompat.getColor(getResources(), R.color.colorAccent, null);
         textView.setTextColor(color);

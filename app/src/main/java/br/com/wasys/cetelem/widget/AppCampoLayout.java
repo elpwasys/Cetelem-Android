@@ -6,6 +6,7 @@ import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.wasys.cetelem.R;
@@ -87,7 +88,7 @@ public class AppCampoLayout extends TextInputLayout {
         Context context = getContext();
         this.setError(null);
         this.setErrorEnabled(false);
-        if (mCampo.obrigatorio) {
+        if (BooleanUtils.isTrue(mCampo.obrigatorio)) {
             if (mEditText.isEmpty()) {
                 this.setErrorEnabled(true);
                 this.setError(context.getString(R.string.msg_required_field, mNome));

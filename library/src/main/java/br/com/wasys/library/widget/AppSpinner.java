@@ -34,7 +34,7 @@ public class AppSpinner extends AppCompatAutoCompleteTextView implements Adapter
 
     private static final int MAX_CLICK_DURATION = 200;
     
-    private List<? extends Option> options;
+    private List<? extends Option> mOptions;
     private OnOptionClickListener mOnOptionClickListener;
 
     public AppSpinner(Context context) {
@@ -126,12 +126,24 @@ public class AppSpinner extends AppCompatAutoCompleteTextView implements Adapter
     public String getValue() {
         String value = null;
         if (mPosition > ListView.INVALID_POSITION) {
-            if (CollectionUtils.isNotEmpty(options) && mPosition < options.size()) {
-                Option option = options.get(mPosition);
+            if (CollectionUtils.isNotEmpty(mOptions) && mPosition < mOptions.size()) {
+                Option option = mOptions.get(mPosition);
                 value = option.getValue();
             }
         }
         return value;
+    }
+
+    // TODO Concluir execucao do metodo
+    public void setSelectedOption(Option option) {
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) getAdapter();
+        if (adapter != null) {
+            String label = option.getLabel();
+            int position = adapter.getPosition(label);
+            if (position < 0) {
+                adapter.add(label);
+            }
+        }
     }
 
     public void setOnOptionClickListener(OnOptionClickListener onOptionClickListener) {
@@ -140,14 +152,14 @@ public class AppSpinner extends AppCompatAutoCompleteTextView implements Adapter
 
     public void setOptions(List<? extends Option> options) {
         setAdapter(null);
-        this.options = options;
-        if (CollectionUtils.isNotEmpty(options)) {
+        mOptions = options;
+        if (CollectionUtils.isNotEmpty(mOptions)) {
             List<String> labels = new ArrayList<>(options.size());
             for (Option option : options) {
                 labels.add(option.getLabel());
             }
             Context context = getContext();
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, labels);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.app_spinner_item, R.id.text1, labels);
             setAdapter(adapter);
         }
     }

@@ -108,8 +108,10 @@ public class MainActivity extends CetelemActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_plus) {
+            String backStackName = ProcessoCadastroFragment.class.getSimpleName();
+            FragmentUtils.popBackStackImmediate(this, backStackName);
             ProcessoCadastroFragment fragment = ProcessoCadastroFragment.newInstance();
-            FragmentUtils.replace(this, R.id.content_main, fragment, "Processo.Cadastro", true);
+            FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
         } else if (id == R.id.nav_search) {
 
         } else if (id == R.id.nav_power) {

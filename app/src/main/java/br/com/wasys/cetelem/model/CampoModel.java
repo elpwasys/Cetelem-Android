@@ -19,7 +19,7 @@ public class CampoModel extends Model {
     public Integer tamanhoMinimo;
     public Integer tamanhoMaximo;
 
-    public boolean obrigatorio;
+    public Boolean obrigatorio;
 
     public enum Tipo {
         CEP,

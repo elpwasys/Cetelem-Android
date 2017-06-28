@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -30,36 +31,51 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import br.com.wasys.cetelem.BuildConfig;
 import br.com.wasys.cetelem.Permission;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ImagePageAdapter;
+import br.com.wasys.cetelem.fragment.DocumentoDialog;
+import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.DateUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class DocumentScanActivity extends CetelemActivity implements ViewPager.OnPageChangeListener {
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-
     private int mPosition = -1;
-    private List<Uri> mUris;
+
+    private ArrayList<Uri> mUris;
+    private ArrayList<Uri> mPassedUris;
+    private ArrayList<Uri> mMarkedDeleteUris;
+    private ArrayList<TipoDocumentoModel> mDocumentos;
+
     private ImagePageAdapter mImagePageAdapter;
 
     @BindView(R.id.pager) ViewPager mViewPager;
     @BindView(R.id.indicator) CirclePageIndicator mCirclePageIndicator;
+
+    @BindView(R.id.button_check) FloatingActionButton mCheckFloatingButton;
     @BindView(R.id.button_delete) FloatingActionButton mDeleteFloatingButton;
 
-    public static Intent newIntent(Context context) {
+    private static final String KEY_URI = DocumentScanActivity.class.getName() + ".mUris";
+    private static final String KEY_DOCUMENTOS = DocumentScanActivity.class.getName() + ".mDocumentos";
+
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    public static Intent newIntent(Context context, ArrayList<Uri> uris, ArrayList<TipoDocumentoModel> documentos) {
         Intent intent = new Intent(context, DocumentScanActivity.class);
+        Bundle extras = new Bundle();
+        if (CollectionUtils.isNotEmpty(uris)) {
+            extras.putParcelableArrayList(KEY_URI, uris);
+        }
+        if (CollectionUtils.isNotEmpty(documentos)) {
+            extras.putSerializable(KEY_DOCUMENTOS, documentos);
+        }
+        intent.putExtras(extras);
         return intent;
     }
 
@@ -79,19 +95,37 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
         actionBar.setTitle(R.string.documentos);
         actionBar.setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
-        mUris = new ArrayList<>();
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras.containsKey(KEY_URI)) {
+            mUris = intent.getParcelableArrayListExtra(KEY_URI);
+        } else {
+            mUris = new ArrayList<>();
+        }
+        if (extras.containsKey(KEY_DOCUMENTOS)) {
+            mDocumentos = (ArrayList<TipoDocumentoModel>) extras.getSerializable(KEY_DOCUMENTOS);
+        }
+        mPassedUris = new ArrayList<>(mUris);
+        mMarkedDeleteUris = new ArrayList<>();
         mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), mUris);
         int pixels = AndroidUtils.toPixels(this, 16f);
         mViewPager.setPageMargin(pixels);
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setAdapter(mImagePageAdapter);
         mCirclePageIndicator.setViewPager(mViewPager);
-        openScanner();
+        toggleButtonsVisible();
+        if (CollectionUtils.isEmpty(mUris)) {
+            openScanner();
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_document_scan, menu);
+        if (CollectionUtils.isEmpty(mDocumentos)) {
+            MenuItem item = menu.findItem(R.id.action_info);
+            item.setVisible(false);
+        }
         return true;
     }
 
@@ -101,8 +135,11 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
         if (id == R.id.action_scan) {
             openScanner();
             return true;
+        } else if (id == R.id.action_info) {
+            openInfo();
+            return true;
         } else if (id == android.R.id.home) {
-            onBackPressed();
+            onCancel();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -111,9 +148,27 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        deleteFiles();
-        setResult(RESULT_CANCELED);
-        finish();
+        onCancel();
+    }
+
+    @OnClick(R.id.button_check)
+    public void onCheckButtonClick() {
+        if (CollectionUtils.isEmpty(mUris) && CollectionUtils.isEmpty(mMarkedDeleteUris)) {
+            onCancel();
+        } else {
+            if (CollectionUtils.isNotEmpty(mMarkedDeleteUris)) {
+                for (Uri uri : mMarkedDeleteUris) {
+                    File file = new File(uri.getPath());
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                }
+            }
+            Intent intent = getIntent();
+            intent.putParcelableArrayListExtra(MediaStore.EXTRA_OUTPUT, mUris);
+            setResult(RESULT_OK, intent);
+            finish();
+        }
     }
 
     @OnClick(R.id.button_delete)
@@ -126,42 +181,33 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
         }
     }
 
-    private void delete(final Uri uri) {
-        Observable<Void> observable = Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                File file = new File(uri.getPath());
-                if (file.exists()) {
-                    file.delete();
-                }
-                subscriber.onCompleted();
-            }
-        });
-        showProgress();
-        prepare(observable).subscribe(new Subscriber() {
-            @Override
-            public void onCompleted() {
-                hideProgress();
-                mUris.remove(mPosition);
-                notifyDataSetChanged();
-                toggleDeleButtonVisible();
-            }
-            @Override
-            public void onNext(Object o) {
-
-            }
-            @Override
-            public void onError(Throwable e) {
-                hideProgress();
-                handle(e);
-            }
-        });
+    private void onCancel() {
+        deleteFiles();
+        setResult(RESULT_CANCELED);
+        finish();
     }
 
-    private void toggleDeleButtonVisible() {
+    private void delete(final Uri uri) {
+        if (mPassedUris.contains(uri)) {
+            mMarkedDeleteUris.add(uri);
+        } else {
+            File file = new File(uri.getPath());
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+        mUris.remove(uri);
+        notifyDataSetChanged();
+    }
+
+    private void toggleButtonsVisible() {
         if (CollectionUtils.isEmpty(mUris)) {
             mDeleteFloatingButton.setVisibility(View.GONE);
+            if (CollectionUtils.isEmpty(mMarkedDeleteUris)) {
+                mCheckFloatingButton.setVisibility(View.GONE);
+            }
         } else {
+            mCheckFloatingButton.setVisibility(View.VISIBLE);
             mDeleteFloatingButton.setVisibility(View.VISIBLE);
         }
     }
@@ -169,9 +215,11 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
     private void deleteFiles() {
         if (CollectionUtils.isNotEmpty(mUris)) {
             for (Uri uri : mUris) {
-                File file = new File(uri.getPath());
-                if (file.exists()) {
-                    file.delete();
+                if (!mPassedUris.contains(uri)) {
+                    File file = new File(uri.getPath());
+                    if (file.exists()) {
+                        file.delete();
+                    }
                 }
             }
         }
@@ -184,6 +232,18 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
             mViewPager.setCurrentItem(mUris.size() - 1);
         }
         mCirclePageIndicator.notifyDataSetChanged();
+        toggleButtonsVisible();
+    }
+
+    private void openInfo() {
+        if (CollectionUtils.isNotEmpty(mDocumentos)) {
+            DocumentoDialog dialog = DocumentoDialog.newInstance(mDocumentos, new DocumentoDialog.OnDismissListener() {
+                @Override
+                public void onDismiss(boolean answer, boolean displayMore) { }
+            }, false);
+            FragmentManager manager = getSupportFragmentManager();
+            dialog.show(manager,  dialog.getClass().getSimpleName());
+        }
     }
 
     private void openScanner() {
@@ -229,14 +289,15 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
                     Uri uri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
                     mUris.add(uri);
                     notifyDataSetChanged();
-                    toggleDeleButtonVisible();
                     handler.postDelayed(scanRunnable, 500);
                     break;
                 }
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
-            // nothing for now
+            if (CollectionUtils.isEmpty(mUris)) {
+                onCancel();
+            }
         }
     }
 

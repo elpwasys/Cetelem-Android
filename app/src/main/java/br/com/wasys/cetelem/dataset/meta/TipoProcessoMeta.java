@@ -13,12 +13,12 @@ import br.com.wasys.cetelem.model.TipoProcessoModel;
  * Created by pascke on 24/06/17.
  */
 
-public class TipoProcessoMeta {
+public class TipoProcessoMeta extends Meta {
 
-    public List<CampoGrupoModel> camposGrupos;
-    public List<TipoDocumentoModel> tiposDocumentos;
+    public ArrayList<CampoGrupoModel> camposGrupos;
+    public ArrayList<TipoDocumentoModel> tiposDocumentos;
 
-    public List<TipoDocumentoModel> getTiposDocumentos(boolean obrigatorio) {
+    public List<TipoDocumentoModel> getTiposDocumentos(Boolean obrigatorio) {
         List<TipoDocumentoModel> itens = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(tiposDocumentos)) {
             for (TipoDocumentoModel item : tiposDocumentos) {

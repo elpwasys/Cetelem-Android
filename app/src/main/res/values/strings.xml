@@ -47,5 +47,16 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="action_escanear">Escanear</string>
+    <string name="action_fotos">Fotos</string>
+    <string name="action_documentos">Documentos</string>
+    <string name="msg_required_documents">Informe todos os documetos obrigatórios</string>
+    <string name="legenda">Legenda</string>
+    <string name="fechar">Fechar</string>
+    <string name="ok">Ok</string>
+    <string name="obrigatorio">Obrigatório</string>
+    <string name="opcional">Opcional</string>
+    <string name="msg_nao_exibir_novamente">Não exibir novamente</string>
+    <string name="action_info">Informação</string>
+    <string name="sem_registros_exibir">Sem registros para exibir</string>
 
 </resources>
