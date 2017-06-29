@@ -3,8 +3,10 @@ package br.com.wasys.cetelem.endpoint;
 import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
+import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
+import br.com.wasys.cetelem.paging.PagingModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -24,4 +26,7 @@ public interface ProcessoEndpoint {
 
     @POST("processo/salvar")
     Call<ProcessoModel> salvar(@Body ProcessoModel processoModel);
+
+    @POST("processo/pesquisar")
+    Call<PagingModel<ProcessoModel>> pesquisar(@Body PesquisaModel pesquisaModel);
 }

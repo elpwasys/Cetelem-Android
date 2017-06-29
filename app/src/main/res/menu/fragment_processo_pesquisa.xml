@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_bar_search"
+        android:title="@string/procurar"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_bar_refresh"
+        android:title="@string/atualizar"
+        app:showAsAction="always"
+        />
+
+</menu>

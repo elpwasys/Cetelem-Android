@@ -1,13 +1,22 @@
 package br.com.wasys.cetelem.service;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.List;
+
 import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.endpoint.ProcessoEndpoint;
+import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
+import br.com.wasys.cetelem.model.UploadModel;
+import br.com.wasys.cetelem.paging.PagingModel;
+import br.com.wasys.cetelem.realm.Upload;
 import br.com.wasys.library.service.Service;
+import io.realm.Realm;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Subscriber;
@@ -20,8 +29,43 @@ public class ProcessoService extends Service {
     public static ProcessoModel salvar(ProcessoModel processoModel) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
         Call<ProcessoModel> call = endpoint.salvar(processoModel);
-        ProcessoModel model = Endpoint.execute(call);
-        return model;
+        ProcessoModel result = Endpoint.execute(call);
+        List<UploadModel> models = processoModel.uploads;
+        if (CollectionUtils.isNotEmpty(models)) {
+            Realm realm = Realm.getDefaultInstance();
+            String reference = String.valueOf(result.id);
+            try {
+                realm.beginTransaction();
+                for (UploadModel model : models) {
+                    String path = model.path;
+                    Upload upload = realm.where(Upload.class)
+                            .equalTo("path", path)
+                            .findFirst();
+                    if (upload == null) {
+                        upload = realm.createObject(Upload.class, path);
+                    }
+                    model.status = UploadModel.Status.WAITING;
+                    model.reference = reference;
+                    upload.copy(model);
+                }
+                realm.commitTransaction();
+            } catch (Throwable e) {
+                if (realm.isInTransaction()) {
+                    realm.cancelTransaction();
+                }
+                throw e;
+            } finally {
+                realm.close();
+            }
+        }
+        return result;
+    }
+
+    public static PagingModel<ProcessoModel> pesquisar(PesquisaModel pesquisaModel) throws Throwable {
+        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
+        Call<PagingModel<ProcessoModel>> call = endpoint.pesquisar(pesquisaModel);
+        PagingModel<ProcessoModel> pagingModel = Endpoint.execute(call);
+        return pagingModel;
     }
 
     public static DataSet<ProcessoModel, ProcessoMeta> getDataSet() throws Throwable {
@@ -39,6 +83,21 @@ public class ProcessoService extends Service {
     }
 
     public static class Async {
+
+        public static Observable<PagingModel<ProcessoModel>> pesquisar(final PesquisaModel pesquisaModel) {
+            return Observable.create(new Observable.OnSubscribe<PagingModel<ProcessoModel>>() {
+                @Override
+                public void call(Subscriber<? super PagingModel<ProcessoModel>> subscriber) {
+                    try {
+                        PagingModel<ProcessoModel> pagingModel = ProcessoService.pesquisar(pesquisaModel);
+                        subscriber.onNext(pagingModel);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
 
         public static Observable<ProcessoModel> salvar(final ProcessoModel processoModel) {
             return Observable.create(new Observable.OnSubscribe<ProcessoModel>() {

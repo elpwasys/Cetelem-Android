@@ -20,6 +20,7 @@ import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 
 import com.todobom.opennotescanner.OpenNoteScannerActivity;
 import com.viewpagerindicator.CirclePageIndicator;
@@ -264,7 +265,7 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
                 }
                 try {
                     Date date = new Date();
-                    String name = DateUtils.format(date, "yyyyMMdd_HHmmss.'jpg'");
+                    String name = DateUtils.format(date, "yyyyMMdd_HHmmssSSS.'jpg'");
                     String path = storage.getAbsolutePath() + File.separator + name;
                     File file = new File(path);
                     file.createNewFile();

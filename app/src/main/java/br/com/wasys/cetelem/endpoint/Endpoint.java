@@ -26,7 +26,7 @@ public class Endpoint {
 
     public static final String BASE_URL = BuildConfig.BASE_URL;
 
-    public static <T> T create(Class<T> clazz) {
+    public static Map<String, String> getHeaders() {
         Context context = Application.getContext();
         Map<String, String> headers = new HashMap<>();
         headers.put(DeviceHeader.DEVICE_SO.key, "Android");
@@ -42,6 +42,11 @@ public class Endpoint {
                 headers.put(DeviceHeader.DEVICE_TOKEN.key, token);
             }
         }
+        return headers;
+    }
+
+    public static <T> T create(Class<T> clazz) {
+        Map<String, String> headers = getHeaders();
         return br.com.wasys.library.http.Endpoint.create(clazz, BASE_URL, headers);
     }
 

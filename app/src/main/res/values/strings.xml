@@ -58,5 +58,12 @@
     <string name="msg_nao_exibir_novamente">Não exibir novamente</string>
     <string name="action_info">Informação</string>
     <string name="sem_registros_exibir">Sem registros para exibir</string>
+    <string name="erro">Erro</string>
+    <string name="enviando">Enviando</string>
+    <string name="aguardando">Aguardando</string>
+    <string name="titulo_pesquisa">Pesquisa</string>
+    <string name="atualizar">Atualizar</string>
+    <string name="filtro">Filtro</string>
+    <string name="procurar">Procurar</string>
 
 </resources>

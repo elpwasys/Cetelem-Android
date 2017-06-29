@@ -34,6 +34,8 @@ import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
+import br.com.wasys.cetelem.model.UploadModel;
+import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppCampoGrupoLayout;
 import br.com.wasys.library.utils.PreferencesUtils;
@@ -51,15 +53,15 @@ import rx.Subscriber;
 
 public class ProcessoCadastroFragment extends CetelemFragment {
 
-    private Long mId;
-    private ArrayList<Uri> mUris;
-    private DataSet<ProcessoModel, ProcessoMeta> mProcessoDataSet;
-    private DataSet<TipoProcessoModel, TipoProcessoMeta> mTipoProcessoDataSet;
-
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
     @BindView(R.id.button_salvar) FloatingActionButton mButtonSalvar;
     @BindView(R.id.spinner_tipo_processo) AppSpinner mSpinnerTipoProcesso;
     @BindView(R.id.layout_spinner) TextInputLayout mSpinnerTextInputLayout;
+
+    private Long mId;
+    private ArrayList<Uri> mUris;
+    private DataSet<ProcessoModel, ProcessoMeta> mProcessoDataSet;
+    private DataSet<TipoProcessoModel, TipoProcessoMeta> mTipoProcessoDataSet;
 
     private static final int REQUEST_SCAN = 1;
 
@@ -106,6 +108,15 @@ public class ProcessoCadastroFragment extends CetelemFragment {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_processo_cadastro, container, false);
+        setTitle(R.string.titulo_processo);
+        mUris = new ArrayList<>();
+        ButterKnife.bind(this, view);
+        return view;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mId != null) {
             outState.putLong(KEY_ID, mId);
@@ -139,15 +150,6 @@ public class ProcessoCadastroFragment extends CetelemFragment {
                 mTipoProcessoDataSet = (DataSet<TipoProcessoModel, TipoProcessoMeta>) savedInstanceState.getSerializable(KEY_TIPO_PROCESSO_DATA_SET);
             }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_processo_cadastro, container, false);
-        setTitle(R.string.titulo_processo);
-        mUris = new ArrayList<>();
-        ButterKnife.bind(this, view);
-        return view;
     }
 
     @Override
@@ -340,6 +342,14 @@ public class ProcessoCadastroFragment extends CetelemFragment {
                 }
                 processoModel.gruposCampos = grupoModels;
             }
+            if (CollectionUtils.isNotEmpty(mUris)) {
+                List<UploadModel> uploads = new ArrayList<>(mUris.size());
+                for (Uri mUri : mUris) {
+                    String path = mUri.getPath();
+                    uploads.add(new UploadModel(path));
+                }
+                processoModel.uploads = uploads;
+            }
             showProgress();
             Observable<ProcessoModel> observable = ProcessoService.Async.salvar(processoModel);
             prepare(observable).subscribe(new Subscriber<ProcessoModel>() {
@@ -355,9 +365,17 @@ public class ProcessoCadastroFragment extends CetelemFragment {
                 @Override
                 public void onNext(ProcessoModel processoModel) {
                     hideProgress();
+                    startService(processoModel.id);
                 }
             });
         }
+    }
+
+    private void startService(Long id) {
+        Context context = getBaseContext();
+        Intent intent = new Intent(context, DigitalizacaoService.class);
+        intent.putExtra(DigitalizacaoService.KEY_PROCESSO, id);
+        context.startService(intent);
     }
 
     private boolean validate() {

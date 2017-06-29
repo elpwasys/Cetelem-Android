@@ -116,6 +116,9 @@ public class AppCampoGrupoLayout extends LinearLayout {
                 if (view instanceof AppCampoLayout) {
                     AppCampoLayout campoLayout = (AppCampoLayout) view;
                     campoModel.valor = campoLayout.getValue();
+                } else if (view instanceof AppSwitch) {
+                    AppSwitch aSwitch = (AppSwitch) view;
+                    campoModel.valor = aSwitch.getValue();
                 }
                 grupoModel.campos.add(campoModel);
             }
@@ -141,6 +144,13 @@ public class AppCampoGrupoLayout extends LinearLayout {
                             campoLayout.configurar(campo);
                             view = campoLayout;
                             break;
+                        case RADIO:
+                            String opcoes = campo.opcoes;
+                            if (AppSwitch.isSwitch(opcoes)) {
+                                AppSwitch appSwitch = new AppSwitch(context);
+                                appSwitch.configurar(campo);
+                                view = appSwitch;
+                            }
                     }
                 }
                 if (view != null) {
