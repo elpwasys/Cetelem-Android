@@ -38,6 +38,7 @@ import br.com.wasys.cetelem.model.UploadModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppCampoGrupoLayout;
+import br.com.wasys.library.utils.FragmentUtils;
 import br.com.wasys.library.utils.PreferencesUtils;
 import br.com.wasys.library.utils.TypeUtils;
 import br.com.wasys.library.widget.AppSpinner;
@@ -92,6 +93,8 @@ public class ProcessoCadastroFragment extends CetelemFragment {
             if (bundle.containsKey(KEY_ID)) {
                 mId = bundle.getLong(KEY_ID);
             }
+        }
+        if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(KEY_ID)) {
                 mId = savedInstanceState.getLong(KEY_ID);
             }
@@ -234,7 +237,11 @@ public class ProcessoCadastroFragment extends CetelemFragment {
 
     private void iniciar() {
         if (mProcessoDataSet == null) {
-            onDataSetLoad();
+            if (mId != null) {
+                editar(mId);
+            } else {
+                onDataSetLoad();
+            }
         } else {
             onDataSetLoaded(mProcessoDataSet);
         }
@@ -243,6 +250,27 @@ public class ProcessoCadastroFragment extends CetelemFragment {
     private void onDataSetLoad() {
         showProgress();
         Observable<DataSet<ProcessoModel, ProcessoMeta>> observable = ProcessoService.Async.getDataSet();
+        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoMeta>>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(DataSet<ProcessoModel, ProcessoMeta> dataSet) {
+                hideProgress();
+                onDataSetLoaded(dataSet);
+            }
+        });
+    }
+
+    private void editar(Long id) {
+        showProgress();
+        Observable<DataSet<ProcessoModel, ProcessoMeta>> observable = ProcessoService.Async.editar(id);
         prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoMeta>>() {
             @Override
             public void onCompleted() {
@@ -376,6 +404,12 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         Intent intent = new Intent(context, DigitalizacaoService.class);
         intent.putExtra(DigitalizacaoService.KEY_PROCESSO, id);
         context.startService(intent);
+
+
+        String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
+        FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
+        ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
     }
 
     private boolean validate() {

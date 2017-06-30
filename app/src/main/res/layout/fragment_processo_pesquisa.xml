@@ -4,15 +4,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".fragment.ProcessoPesquisaFragment">
+
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_gravity="start"
         android:layout_weight="1"
-        android:visibility="visible"
-        android:layout_gravity="start"/>
+        android:visibility="visible" />
+
     <br.com.wasys.cetelem.widget.PagingBarLayout
         android:id="@+id/paging_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
+        android:layout_height="?attr/actionBarSize"
+        android:visibility="gone" />
 </LinearLayout>

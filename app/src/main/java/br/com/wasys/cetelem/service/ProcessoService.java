@@ -13,7 +13,7 @@ import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
-import br.com.wasys.cetelem.paging.PagingModel;
+import br.com.wasys.cetelem.paging.ProcessoPagingModel;
 import br.com.wasys.cetelem.realm.Upload;
 import br.com.wasys.library.service.Service;
 import io.realm.Realm;
@@ -61,11 +61,18 @@ public class ProcessoService extends Service {
         return result;
     }
 
-    public static PagingModel<ProcessoModel> pesquisar(PesquisaModel pesquisaModel) throws Throwable {
+    public static ProcessoPagingModel pesquisar(PesquisaModel pesquisaModel) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<PagingModel<ProcessoModel>> call = endpoint.pesquisar(pesquisaModel);
-        PagingModel<ProcessoModel> pagingModel = Endpoint.execute(call);
+        Call<ProcessoPagingModel> call = endpoint.pesquisar(pesquisaModel);
+        ProcessoPagingModel pagingModel = Endpoint.execute(call);
         return pagingModel;
+    }
+
+    public static DataSet<ProcessoModel, ProcessoMeta> editar(Long id) throws Throwable {
+        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
+        Call<DataSet<ProcessoModel, ProcessoMeta>> call = endpoint.editar(id);
+        DataSet<ProcessoModel, ProcessoMeta> dataSet = Endpoint.execute(call);
+        return dataSet;
     }
 
     public static DataSet<ProcessoModel, ProcessoMeta> getDataSet() throws Throwable {
@@ -84,12 +91,12 @@ public class ProcessoService extends Service {
 
     public static class Async {
 
-        public static Observable<PagingModel<ProcessoModel>> pesquisar(final PesquisaModel pesquisaModel) {
-            return Observable.create(new Observable.OnSubscribe<PagingModel<ProcessoModel>>() {
+        public static Observable<ProcessoPagingModel> pesquisar(final PesquisaModel pesquisaModel) {
+            return Observable.create(new Observable.OnSubscribe<ProcessoPagingModel>() {
                 @Override
-                public void call(Subscriber<? super PagingModel<ProcessoModel>> subscriber) {
+                public void call(Subscriber<? super ProcessoPagingModel> subscriber) {
                     try {
-                        PagingModel<ProcessoModel> pagingModel = ProcessoService.pesquisar(pesquisaModel);
+                        ProcessoPagingModel pagingModel = ProcessoService.pesquisar(pesquisaModel);
                         subscriber.onNext(pagingModel);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
@@ -106,6 +113,21 @@ public class ProcessoService extends Service {
                     try {
                         ProcessoModel model = ProcessoService.salvar(processoModel);
                         subscriber.onNext(model);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+
+        public static Observable<DataSet<ProcessoModel, ProcessoMeta>> editar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoMeta>>() {
+                @Override
+                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoMeta>> subscriber) {
+                    try {
+                        DataSet<ProcessoModel, ProcessoMeta> dataSet = ProcessoService.editar(id);
+                        subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);

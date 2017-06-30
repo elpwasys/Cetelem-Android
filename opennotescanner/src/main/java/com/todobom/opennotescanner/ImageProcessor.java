@@ -57,7 +57,7 @@ public class ImageProcessor extends Handler {
     private final OpenNoteScannerActivity mMainActivity;
     private boolean mBugRotate;
     private boolean colorMode=false;
-    private boolean filterMode=true;
+    private boolean filterMode=false;
     private double colorGain = 1.5;       // contrast
     private double colorBias = 0;         // bright
     private int colorThresh = 110;        // threshold

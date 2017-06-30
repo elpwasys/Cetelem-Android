@@ -272,7 +272,6 @@ public class OpenNoteScannerActivity extends AppCompatActivity
                 mFabToolbar.hide();
             }
         });
-
     }
 
     public boolean setFlash(boolean stateFlash) {

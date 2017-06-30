@@ -95,6 +95,11 @@ public class AppCampoGrupoLayout extends LinearLayout {
                     if (!campoLayout.validate()) {
                         valid = false;
                     }
+                } else if (view instanceof AppRadioLayout) {
+                    AppRadioLayout radioLayout = (AppRadioLayout) view;
+                    if (!radioLayout.validate()) {
+                        valid = false;
+                    }
                 }
             }
         }
@@ -119,6 +124,9 @@ public class AppCampoGrupoLayout extends LinearLayout {
                 } else if (view instanceof AppSwitch) {
                     AppSwitch aSwitch = (AppSwitch) view;
                     campoModel.valor = aSwitch.getValue();
+                } else if (view instanceof AppRadioLayout) {
+                    AppRadioLayout radioLayout = (AppRadioLayout) view;
+                    campoModel.valor = radioLayout.getValue();
                 }
                 grupoModel.campos.add(campoModel);
             }
@@ -150,6 +158,10 @@ public class AppCampoGrupoLayout extends LinearLayout {
                                 AppSwitch appSwitch = new AppSwitch(context);
                                 appSwitch.configurar(campo);
                                 view = appSwitch;
+                            } else {
+                                AppRadioLayout appRadioLayout = new AppRadioLayout(context);
+                                appRadioLayout.configurar(campo);
+                                view = appRadioLayout;
                             }
                     }
                 }

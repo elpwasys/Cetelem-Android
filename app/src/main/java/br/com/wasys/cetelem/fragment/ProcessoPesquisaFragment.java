@@ -7,8 +7,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -17,9 +20,10 @@ import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ProcessoAdapter;
 import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
-import br.com.wasys.cetelem.paging.PagingModel;
+import br.com.wasys.cetelem.paging.ProcessoPagingModel;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.PagingBarLayout;
+import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
@@ -28,13 +32,13 @@ import rx.Subscriber;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ProcessoPesquisaFragment extends CetelemFragment {
+public class ProcessoPesquisaFragment extends CetelemFragment implements AdapterView.OnItemClickListener {
 
     @BindView(R.id.list_view) ListView mListView;
     @BindView(R.id.paging_bar) PagingBarLayout mPagingBarLayout;
 
     private PesquisaModel mPesquisaModel;
-    private PagingModel<ProcessoModel> mPagingModel;
+    private ProcessoPagingModel mPagingModel;
 
     public static ProcessoPesquisaFragment newInstance() {
         ProcessoPesquisaFragment fragment = new ProcessoPesquisaFragment();
@@ -51,6 +55,7 @@ public class ProcessoPesquisaFragment extends CetelemFragment {
         View view = inflater.inflate(R.layout.fragment_processo_pesquisa, container, false);
         setTitle(R.string.titulo_pesquisa);
         ButterKnife.bind(this, view);
+        mListView.setOnItemClickListener(this);
         mPesquisaModel = new PesquisaModel();
         mPesquisaModel.page = 0;
         return view;
@@ -59,11 +64,26 @@ public class ProcessoPesquisaFragment extends CetelemFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        pesquisar();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_processo_pesquisa, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        switch (itemId) {
+            case R.id.action_refresh:
+                pesquisar();
+                return true;
+            case R.id.action_search:
+                // ABRIR DOCUMENTOS
+                return true;
+        }
+        return false;
     }
 
     private void atualizar() {
@@ -73,8 +93,8 @@ public class ProcessoPesquisaFragment extends CetelemFragment {
 
     private void pesquisar() {
         showProgress();
-        Observable<PagingModel<ProcessoModel>> observable = ProcessoService.Async.pesquisar(mPesquisaModel);
-        prepare(observable).subscribe(new Subscriber<PagingModel<ProcessoModel>>() {
+        Observable<ProcessoPagingModel> observable = ProcessoService.Async.pesquisar(mPesquisaModel);
+        prepare(observable).subscribe(new Subscriber<ProcessoPagingModel>() {
             @Override
             public void onCompleted() {
                 hideProgress();
@@ -85,10 +105,20 @@ public class ProcessoPesquisaFragment extends CetelemFragment {
                 handle(e);
             }
             @Override
-            public void onNext(PagingModel<ProcessoModel> pagingModel) {
+            public void onNext(ProcessoPagingModel pagingModel) {
                 hideProgress();
                 mPagingModel = pagingModel;
+                atualizar();
             }
         });
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Adapter adapter = parent.getAdapter();
+        ProcessoModel processo = (ProcessoModel) adapter.getItem(position);
+        ProcessoCadastroFragment fragment = ProcessoCadastroFragment.newInstance(processo.id);
+        String backStackName = ProcessoCadastroFragment.class.getSimpleName();
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
     }
 }
