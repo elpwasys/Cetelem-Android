@@ -14,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
@@ -25,23 +24,23 @@ import br.com.wasys.library.utils.AndroidUtils;
  * Created by pascke on 25/06/17.
  */
 
-public class AppCampoGrupoLayout extends LinearLayout {
+public class AppGroupInputLayout extends LinearLayout {
 
     private CampoGrupoModel mGrupo;
 
-    public AppCampoGrupoLayout(Context context) {
+    public AppGroupInputLayout(Context context) {
         super(context);
     }
 
-    public AppCampoGrupoLayout(Context context, @Nullable AttributeSet attrs) {
+    public AppGroupInputLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public AppCampoGrupoLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public AppGroupInputLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public AppCampoGrupoLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public AppGroupInputLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
@@ -90,8 +89,8 @@ public class AppCampoGrupoLayout extends LinearLayout {
         if (childCount > 0) {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
-                if (view instanceof AppCampoLayout) {
-                    AppCampoLayout campoLayout = (AppCampoLayout) view;
+                if (view instanceof AppTextInputLayout) {
+                    AppTextInputLayout campoLayout = (AppTextInputLayout) view;
                     if (!campoLayout.validate()) {
                         valid = false;
                     }
@@ -118,8 +117,8 @@ public class AppCampoGrupoLayout extends LinearLayout {
                 campoModel.id = campo.id;
                 campoModel.nome = campo.nome;
                 View view = findViewWithTag(campo.nome);
-                if (view instanceof AppCampoLayout) {
-                    AppCampoLayout campoLayout = (AppCampoLayout) view;
+                if (view instanceof AppTextInputLayout) {
+                    AppTextInputLayout campoLayout = (AppTextInputLayout) view;
                     campoModel.valor = campoLayout.getValue();
                 } else if (view instanceof AppSwitch) {
                     AppSwitch aSwitch = (AppSwitch) view;
@@ -148,9 +147,9 @@ public class AppCampoGrupoLayout extends LinearLayout {
                         case MOEDA:
                         case INTEIRO:
                         case TEXTO_LONGO:
-                            AppCampoLayout campoLayout = new AppCampoLayout(context);
-                            campoLayout.configurar(campo);
-                            view = campoLayout;
+                            AppTextInputLayout inputLayout = new AppTextInputLayout(context);
+                            inputLayout.configurar(campo);
+                            view = inputLayout;
                             break;
                         case RADIO:
                             String opcoes = campo.opcoes;

@@ -37,7 +37,7 @@ import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
-import br.com.wasys.cetelem.widget.AppCampoGrupoLayout;
+import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FragmentUtils;
 import br.com.wasys.library.utils.PreferencesUtils;
 import br.com.wasys.library.utils.TypeUtils;
@@ -205,8 +205,7 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_SCAN: {
-                    ArrayList<Uri> uris = intent.getParcelableArrayListExtra(MediaStore.EXTRA_OUTPUT);
-                    mUris = uris;
+                    mUris = intent.getParcelableArrayListExtra(MediaStore.EXTRA_OUTPUT);
                     if (mUris == null) {
                         mUris = new ArrayList<>();
                     }
@@ -341,7 +340,7 @@ public class ProcessoCadastroFragment extends CetelemFragment {
             if (CollectionUtils.isNotEmpty(meta.camposGrupos)) {
                 Context context = getContext();
                 for (CampoGrupoModel grupo : meta.camposGrupos) {
-                    AppCampoGrupoLayout campoGrupoLayout = new AppCampoGrupoLayout(context);
+                    AppGroupInputLayout campoGrupoLayout = new AppGroupInputLayout(context);
                     campoGrupoLayout.setOrientation(LinearLayout.VERTICAL);
                     campoGrupoLayout.setGrupo(grupo);
                     mLayoutFields.addView(campoGrupoLayout);
@@ -362,8 +361,8 @@ public class ProcessoCadastroFragment extends CetelemFragment {
                 List<CampoGrupoModel> grupoModels = new ArrayList<>();
                 for (int i = 0; i < childCount; i++) {
                     View view = mLayoutFields.getChildAt(i);
-                    if (view instanceof AppCampoGrupoLayout) {
-                        AppCampoGrupoLayout grupoLayout = (AppCampoGrupoLayout) view;
+                    if (view instanceof AppGroupInputLayout) {
+                        AppGroupInputLayout grupoLayout = (AppGroupInputLayout) view;
                         CampoGrupoModel grupoModel = grupoLayout.getValue();
                         grupoModels.add(grupoModel);
                     }
@@ -427,8 +426,8 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         if (childCount > 0) {
             for (int i = 0; i < childCount; i++) {
                 View view = mLayoutFields.getChildAt(i);
-                if (view instanceof AppCampoGrupoLayout) {
-                    AppCampoGrupoLayout grupoLayout = (AppCampoGrupoLayout) view;
+                if (view instanceof AppGroupInputLayout) {
+                    AppGroupInputLayout grupoLayout = (AppGroupInputLayout) view;
                     if (!grupoLayout.isValid()) {
                         valid = false;
                     }

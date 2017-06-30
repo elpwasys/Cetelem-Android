@@ -11,28 +11,27 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.model.CampoModel;
-import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.FieldUtils;
 
 /**
  * Created by pascke on 25/06/17.
  */
 
-public class AppCampoLayout extends TextInputLayout {
+public class AppTextInputLayout extends TextInputLayout {
 
     private String mNome;
     private CampoModel mCampo;
     private AppEditText mEditText;
 
-    public AppCampoLayout(Context context) {
+    public AppTextInputLayout(Context context) {
         super(context);
     }
 
-    public AppCampoLayout(Context context, AttributeSet attrs) {
+    public AppTextInputLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public AppCampoLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public AppTextInputLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -57,7 +56,7 @@ public class AppCampoLayout extends TextInputLayout {
         } else if (CampoModel.Tipo.MOEDA.equals(tipo)) {
             mEditText = new AppMoneyEditText(context);
         } else if (CampoModel.Tipo.INTEIRO.equals(tipo)) {
-            mEditText = new AppIntegerEditText(context);
+            mEditText = new AppNumberEditText(context);
         } else if (CampoModel.Tipo.TEXTO_LONGO.equals(tipo)) {
             mEditText = new AppEditText(context);
         } else {
@@ -92,6 +91,24 @@ public class AppCampoLayout extends TextInputLayout {
             if (mEditText.isEmpty()) {
                 this.setErrorEnabled(true);
                 this.setError(context.getString(R.string.msg_required_field, mNome));
+                return false;
+            }
+        }
+        Integer tamanhoMinimo = mCampo.tamanhoMinimo;
+        if (tamanhoMinimo != null) {
+            String value = FieldUtils.getValue(mEditText);
+            if (StringUtils.length(value) < tamanhoMinimo) {
+                this.setErrorEnabled(true);
+                this.setError(context.getString(R.string.msg_min_size_field, mNome, tamanhoMinimo));
+                return false;
+            }
+        }
+        Integer tamanhoMaximo = mCampo.tamanhoMaximo;
+        if (tamanhoMaximo != null) {
+            String value = FieldUtils.getValue(mEditText);
+            if (StringUtils.length(value) > tamanhoMaximo) {
+                this.setErrorEnabled(true);
+                this.setError(context.getString(R.string.msg_max_size_field, mNome, tamanhoMaximo));
                 return false;
             }
         }

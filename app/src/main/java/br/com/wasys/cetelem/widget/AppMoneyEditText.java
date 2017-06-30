@@ -10,7 +10,7 @@ import br.com.wasys.library.utils.FieldUtils;
  * Created by pascke on 25/06/17.
  */
 
-public class AppMoneyEditText extends AppIntegerEditText {
+public class AppMoneyEditText extends AppNumberEditText {
 
     public AppMoneyEditText(Context context) {
         super(context);

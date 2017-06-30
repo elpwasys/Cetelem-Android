@@ -1,10 +1,7 @@
 package br.com.wasys.cetelem.widget;
 
 import android.content.Context;
-import android.text.InputType;
 import android.util.AttributeSet;
-
-import java.lang.reflect.Field;
 
 import br.com.wasys.library.text.Mask;
 import br.com.wasys.library.utils.FieldUtils;
@@ -14,7 +11,7 @@ import br.com.wasys.library.utils.ValidatorUtils;
  * Created by pascke on 25/06/17.
  */
 
-public class AppCpfEditText extends AppIntegerEditText {
+public class AppCpfEditText extends AppNumberEditText {
 
     public AppCpfEditText(Context context) {
         super(context);
