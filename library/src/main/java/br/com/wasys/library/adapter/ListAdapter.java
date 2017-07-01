@@ -13,26 +13,31 @@ import java.util.List;
  */
 public abstract class ListAdapter<T> extends BaseAdapter {
 
-    protected List<T> rows;
-    protected LayoutInflater inflater;
+    protected List<T> mRows;
+    protected LayoutInflater mInflater;
 
     public ListAdapter(Context context, List<T> rows) {
-        this.rows = rows;
-        this.inflater = LayoutInflater.from(context);
+        this.mRows = rows;
+        this.mInflater = LayoutInflater.from(context);
     }
 
     @Override
     public int getCount() {
-        return CollectionUtils.size(rows);
+        return CollectionUtils.size(mRows);
     }
 
     @Override
     public T getItem(int position) {
-        return rows != null ? rows.get(position) : null;
+        return mRows != null ? mRows.get(position) : null;
     }
 
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    public void setRows(List<T> rows) {
+        mRows = rows;
+        notifyDataSetChanged();
     }
 }

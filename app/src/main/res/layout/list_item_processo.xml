@@ -27,6 +27,7 @@
                     android:id="@+id/text_view_id"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textAppearance="@android:style/TextAppearance.Small"
                     android:layout_weight="1" />
                 <TextView
@@ -34,19 +35,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
+                    android:textColor="@color/grey_500"
                     android:textAppearance="@android:style/TextAppearance.Small" />
             </LinearLayout>
-
             <TextView
                 android:id="@+id/text_view_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@android:style/TextAppearance.Small" />
-
             <TextView
                 android:id="@+id/text_view_tipo_processo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/grey_500"
                 android:textAppearance="@android:style/TextAppearance.Small" />
         </LinearLayout>
     </LinearLayout>

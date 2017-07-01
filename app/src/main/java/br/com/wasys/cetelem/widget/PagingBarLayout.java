@@ -1,19 +1,24 @@
 package br.com.wasys.cetelem.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.paging.PagingModel;
+import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.FieldUtils;
 
 /**
@@ -26,8 +31,8 @@ public class PagingBarLayout extends LinearLayout {
     private PagingModel pagingModel;
 
     private TextView mCenterTextView;
-    private ImageView mLeftImageView;
-    private ImageView mRightImageView;
+    private ImageButton mLeftImageView;
+    private ImageButton mRightImageView;
 
     public PagingBarLayout(Context context) {
         super(context);
@@ -49,14 +54,8 @@ public class PagingBarLayout extends LinearLayout {
         Resources resources = getResources();
         setOrientation(HORIZONTAL);
         setBackgroundResource(R.color.colorPrimary);
-        setPadding(16, 16, 16, 16);
-
         // Left
-        LinearLayout leftLayout = new LinearLayout(context);
-        leftLayout.setGravity(Gravity.LEFT);
-        leftLayout.setOrientation(HORIZONTAL);
-        leftLayout.setLayoutParams(new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        mLeftImageView = new ImageView(context);
+        mLeftImageView = new ImageButton(context, null, android.R.attr.buttonBarButtonStyle);
         mLeftImageView.setVisibility(INVISIBLE);
         mLeftImageView.setOnClickListener(new OnClickListener() {
             @Override
@@ -70,25 +69,24 @@ public class PagingBarLayout extends LinearLayout {
                 }
             }
         });
-        //mLeftImageView.setBackgroundResource(R.drawable.renault_btn_default_holo_light);
-        mLeftImageView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        mLeftImageView.setImageResource(R.drawable.ic_arrow_left_white);
-        leftLayout.addView(mLeftImageView);
-        addView(leftLayout);
+        LayoutParams leftImageViewLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        leftImageViewLayoutParams.gravity = Gravity.CENTER;
+        mLeftImageView.setLayoutParams(leftImageViewLayoutParams);
+        mLeftImageView.setImageResource(R.drawable.ic_arrow_left);
+        mLeftImageView.setImageTintList(ContextCompat.getColorStateList(context, android.R.color.white));
+        addView(mLeftImageView);
         // Center
         mCenterTextView = new TextView(context);
-
-        mCenterTextView.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null));
+        LayoutParams centerTextViewLayoutParams = new LayoutParams(1, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        centerTextViewLayoutParams.gravity = Gravity.CENTER;
+        mCenterTextView.setGravity(Gravity.CENTER);
+        mCenterTextView.setLayoutParams(centerTextViewLayoutParams);
+        TextViewCompat.setTextAppearance(mCenterTextView, android.R.style.TextAppearance_Small);
         mCenterTextView.setTypeface(null, Typeface.BOLD);
-        LayoutParams centerLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        centerLayoutParams.gravity = Gravity.CENTER;
+        mCenterTextView.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, null));
         addView(mCenterTextView);
         // Right
-        LinearLayout rightLayout = new LinearLayout(context);
-        rightLayout.setGravity(Gravity.RIGHT);
-        rightLayout.setOrientation(HORIZONTAL);
-        rightLayout.setLayoutParams(new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        mRightImageView = new ImageView(context);
+        mRightImageView = new ImageButton(context, null, android.R.attr.buttonBarButtonStyle);
         mRightImageView.setVisibility(INVISIBLE);
         mRightImageView.setOnClickListener(new OnClickListener() {
             @Override
@@ -102,11 +100,12 @@ public class PagingBarLayout extends LinearLayout {
                 }
             }
         });
-        //mRightImageView.setBackgroundResource(R.drawable.renault_btn_default_holo_light);
-        mRightImageView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        mRightImageView.setImageResource(R.drawable.ic_arrow_right_white);
-        rightLayout.addView(mRightImageView);
-        addView(rightLayout);
+        LayoutParams rightImageViewLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rightImageViewLayoutParams.gravity = Gravity.CENTER;
+        mRightImageView.setLayoutParams(rightImageViewLayoutParams);
+        mRightImageView.setImageResource(R.drawable.ic_arrow_right);
+        mRightImageView.setImageTintList(ContextCompat.getColorStateList(context, android.R.color.white));
+        addView(mRightImageView);
     }
 
     public void setCallback(Callback callback) {

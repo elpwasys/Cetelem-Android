@@ -23,6 +23,7 @@ import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.paging.ProcessoPagingModel;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.PagingBarLayout;
+import br.com.wasys.library.adapter.ListAdapter;
 import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,6 +40,7 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
 
     private PesquisaModel mPesquisaModel;
     private ProcessoPagingModel mPagingModel;
+    private ListAdapter<ProcessoModel> mListAdapter;
 
     public static ProcessoPesquisaFragment newInstance() {
         ProcessoPesquisaFragment fragment = new ProcessoPesquisaFragment();
@@ -55,16 +57,30 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
         View view = inflater.inflate(R.layout.fragment_processo_pesquisa, container, false);
         setTitle(R.string.titulo_pesquisa);
         ButterKnife.bind(this, view);
+        mListAdapter = new ProcessoAdapter(getBaseContext(), null);
         mListView.setOnItemClickListener(this);
-        mPesquisaModel = new PesquisaModel();
-        mPesquisaModel.page = 0;
+        mListView.setAdapter(mListAdapter);
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mPesquisaModel = new PesquisaModel();
+        mPesquisaModel.page = 0;
         pesquisar();
+        mPagingBarLayout.setCallback(new PagingBarLayout.Callback() {
+            @Override
+            public void onNextClick(int page) {
+                mPesquisaModel.page = page;
+                pesquisar();
+            }
+            @Override
+            public void onPreviousClick(int page) {
+                mPesquisaModel.page = page;
+                pesquisar();
+            }
+        });
     }
 
     @Override
@@ -88,7 +104,8 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
 
     private void atualizar() {
         List<ProcessoModel> records = mPagingModel.getRecords();
-        mListView.setAdapter(new ProcessoAdapter(getBaseContext(), records));
+        mListAdapter.setRows(records);
+        mPagingBarLayout.setPagingModel(mPagingModel);
     }
 
     private void pesquisar() {

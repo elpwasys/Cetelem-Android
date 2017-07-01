@@ -65,5 +65,6 @@
     <string name="procurar">Procurar</string>
     <string name="msg_min_size_field">%1$s o tamanho mínimo é %2$d</string>
     <string name="msg_max_size_field">%1$s o tamanho máximo é %2$d</string>
+    <string name="status_processo_concluido_automatico">Concluído Automaticamente</string>
 
 </resources>

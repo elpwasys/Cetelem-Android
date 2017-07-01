@@ -16,6 +16,6 @@
     <br.com.wasys.cetelem.widget.PagingBarLayout
         android:id="@+id/paging_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:visibility="gone" />
+        android:layout_height="?attr/actionBarSize" />
+
 </LinearLayout>

@@ -30,7 +30,7 @@ public class ProcessoAdapter extends ListAdapter<ProcessoModel> {
         }
         else {
             holder = new ViewHolder();
-            view = inflater.inflate(R.layout.list_item_processo, null);
+            view = mInflater.inflate(R.layout.list_item_processo, null);
             holder.idTextView = (TextView) view.findViewById(R.id.text_view_id);
             holder.dataTextView = (TextView) view.findViewById(R.id.text_view_data);
             holder.statusTextView = (TextView) view.findViewById(R.id.text_view_status);
@@ -38,7 +38,7 @@ public class ProcessoAdapter extends ListAdapter<ProcessoModel> {
             holder.tipoDocumentoTextView = (TextView) view.findViewById(R.id.text_view_tipo_processo);
             view.setTag(holder);
         }
-        ProcessoModel processo = rows.get(position);
+        ProcessoModel processo = mRows.get(position);
         holder.statusTextView.setText(processo.status.stringRes);
         holder.statusImageView.setImageResource(processo.status.drawableRes);
         FieldUtils.setText(holder.idTextView, processo.id);

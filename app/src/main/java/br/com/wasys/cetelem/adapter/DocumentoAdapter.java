@@ -3,7 +3,6 @@ package br.com.wasys.cetelem.adapter;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -38,12 +37,12 @@ public class DocumentoAdapter extends ListAdapter<DocumentoDialog.Documento> {
         }
         else {
             holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.list_item_dialog_documento, null);
+            convertView = mInflater.inflate(R.layout.list_item_dialog_documento, null);
             holder.textView = (TextView) convertView.findViewById(R.id.textView);
             holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
             convertView.setTag(holder);
         }
-        DocumentoDialog.Documento documento = rows.get(position);
+        DocumentoDialog.Documento documento = mRows.get(position);
         FieldUtils.setText(holder.textView, documento.getLabel());
         if (BooleanUtils.isTrue(documento.getObrigatorio())) {
             holder.imageView.setImageResource(R.drawable.ic_radio_unchecked);

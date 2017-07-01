@@ -29,7 +29,8 @@ public class ProcessoModel extends Model {
         PENDENTE (R.string.status_processo_pendente, R.drawable.processo_status_pendente),
         EM_ACOMPANHAMENTO (R.string.status_processo_em_acompanhamento, R.drawable.processo_status_em_acompanhamento),
         CONCLUIDO (R.string.status_processo_concluido, R.drawable.processo_status_concluido),
-        CANCELADO (R.string.status_processo_cancelado, R.drawable.processo_status_cancelado);
+        CANCELADO (R.string.status_processo_cancelado, R.drawable.processo_status_cancelado),
+        CONCLUIDO_AUTOMATICO (R.string.status_processo_concluido_automatico, R.drawable.processo_status_concluido_automatico);
         public int stringRes;
         public int drawableRes;
         Status(@StringRes int stringRes, @DrawableRes int drawableRes) {
