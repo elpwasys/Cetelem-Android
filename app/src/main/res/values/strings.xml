@@ -66,5 +66,11 @@
     <string name="msg_min_size_field">%1$s o tamanho mínimo é %2$d</string>
     <string name="msg_max_size_field">%1$s o tamanho máximo é %2$d</string>
     <string name="status_processo_concluido_automatico">Concluído Automaticamente</string>
+    <string name="periodo_de">Período de</string>
+    <string name="periodo_ate">Período até</string>
+    <string name="filtrar">Filtrar</string>
+    <string name="numero">Número</string>
+    <string name="limpar">Limpar</string>
+    <string name="status_processo">Status do processo</string>
 
 </resources>

@@ -403,8 +403,6 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         Intent intent = new Intent(context, DigitalizacaoService.class);
         intent.putExtra(DigitalizacaoService.KEY_PROCESSO, id);
         context.startService(intent);
-
-
         String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
         FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
         ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();

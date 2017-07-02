@@ -29,6 +29,16 @@ public class AppNumberEditText extends AppEditText {
     }
 
     private void configure() {
+        setLines(1);
+        setSingleLine(true);
         setInputType(InputType.TYPE_CLASS_NUMBER);
+    }
+
+    public String getValue() {
+        return FieldUtils.getValue(this);
+    }
+
+    public void setValue(String value) {
+        FieldUtils.setText(this, value);
     }
 }

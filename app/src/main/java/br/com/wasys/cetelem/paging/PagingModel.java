@@ -1,11 +1,12 @@
 package br.com.wasys.cetelem.paging;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by pascke on 09/05/16.
  */
-public abstract class PagingModel<T> {
+public abstract class PagingModel<T> implements Serializable {
 
     private int page;
     private int qtde;

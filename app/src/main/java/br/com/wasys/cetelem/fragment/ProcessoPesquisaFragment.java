@@ -4,6 +4,7 @@ package br.com.wasys.cetelem.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,10 +19,13 @@ import java.util.List;
 
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ProcessoAdapter;
+import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
+import br.com.wasys.cetelem.model.FiltroModel;
 import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.paging.ProcessoPagingModel;
-import br.com.wasys.cetelem.service.ProcessoService;
+import br.com.wasys.cetelem.service.PesquisaService;
 import br.com.wasys.cetelem.widget.PagingBarLayout;
 import br.com.wasys.library.adapter.ListAdapter;
 import br.com.wasys.library.utils.FragmentUtils;
@@ -38,6 +42,7 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
     @BindView(R.id.list_view) ListView mListView;
     @BindView(R.id.paging_bar) PagingBarLayout mPagingBarLayout;
 
+    private ProcessoMeta mProcessoMeta;
     private PesquisaModel mPesquisaModel;
     private ProcessoPagingModel mPagingModel;
     private ListAdapter<ProcessoModel> mListAdapter;
@@ -68,17 +73,16 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
         super.onViewCreated(view, savedInstanceState);
         mPesquisaModel = new PesquisaModel();
         mPesquisaModel.page = 0;
-        pesquisar();
         mPagingBarLayout.setCallback(new PagingBarLayout.Callback() {
             @Override
             public void onNextClick(int page) {
                 mPesquisaModel.page = page;
-                pesquisar();
+                filtrar();
             }
             @Override
             public void onPreviousClick(int page) {
                 mPesquisaModel.page = page;
-                pesquisar();
+                filtrar();
             }
         });
     }
@@ -93,13 +97,33 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_refresh:
-                pesquisar();
+                filtrar();
                 return true;
             case R.id.action_search:
-                // ABRIR DOCUMENTOS
+                onOpenSearchClick();
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        iniciar();
+    }
+
+    private void onOpenSearchClick() {
+        FiltroModel filtro = mPesquisaModel.filtro;
+        FiltroDialog dialog = FiltroDialog.newInstance(mProcessoMeta, filtro, new FiltroDialog.OnFiltroListener() {
+            @Override
+            public void onFiltro(FiltroModel filtroModel) {
+                mPesquisaModel.page = 0;
+                mPesquisaModel.filtro = filtroModel;
+                filtrar();
+            }
+        });
+        FragmentManager manager = getFragmentManager();
+        dialog.show(manager,  dialog.getClass().getSimpleName());
     }
 
     private void atualizar() {
@@ -108,9 +132,32 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
         mPagingBarLayout.setPagingModel(mPagingModel);
     }
 
-    private void pesquisar() {
+    private void iniciar() {
         showProgress();
-        Observable<ProcessoPagingModel> observable = ProcessoService.Async.pesquisar(mPesquisaModel);
+        Observable<DataSet<ProcessoPagingModel, ProcessoMeta>> observable = PesquisaService.Async.getDataSet();
+        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoPagingModel, ProcessoMeta>>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(DataSet<ProcessoPagingModel, ProcessoMeta> dataSet) {
+                hideProgress();
+                mPagingModel = dataSet.data;
+                mProcessoMeta = dataSet.meta;
+                atualizar();
+            }
+        });
+    }
+
+    private void filtrar() {
+        showProgress();
+        Observable<ProcessoPagingModel> observable = PesquisaService.Async.filtrar(mPesquisaModel);
         prepare(observable).subscribe(new Subscriber<ProcessoPagingModel>() {
             @Override
             public void onCompleted() {

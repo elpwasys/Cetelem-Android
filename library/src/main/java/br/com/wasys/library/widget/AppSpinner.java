@@ -15,12 +15,14 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import br.com.wasys.library.R;
+import br.com.wasys.library.utils.FieldUtils;
 
 /**
  * Created by pascke on 24/06/17.
@@ -134,14 +136,17 @@ public class AppSpinner extends AppCompatAutoCompleteTextView implements Adapter
         return value;
     }
 
-    // TODO Concluir execucao do metodo
-    public void setSelectedOption(Option option) {
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) getAdapter();
-        if (adapter != null) {
-            String label = option.getLabel();
-            int position = adapter.getPosition(label);
-            if (position < 0) {
-                adapter.add(label);
+    public void setValue(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return;
+        }
+        if (CollectionUtils.isNotEmpty(mOptions)) {
+            for (int i = 0; i < mOptions.size(); i++) {
+                Option option = mOptions.get(i);
+                if (StringUtils.equals(value, option.getValue())) {
+                    mPosition = i;
+                    FieldUtils.setText(this, option.getLabel());
+                }
             }
         }
     }
@@ -153,6 +158,7 @@ public class AppSpinner extends AppCompatAutoCompleteTextView implements Adapter
     public void setOptions(List<? extends Option> options) {
         setAdapter(null);
         mOptions = options;
+        mPosition = ListView.INVALID_POSITION;
         if (CollectionUtils.isNotEmpty(mOptions)) {
             List<String> labels = new ArrayList<>(options.size());
             for (Option option : options) {

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.AppCompatEditText;
@@ -46,15 +47,21 @@ public class AppDateEditText extends AppEditText implements DatePickerDialog.OnD
 
     private void configure() {
         Context context = getContext();
+        setLines(1);
+        setSingleLine(true);
         Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_today);
         drawable.mutate().setAlpha(128);
         setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
-
         Calendar calendar = Calendar.getInstance();
         int mYear = calendar.get(Calendar.YEAR);
         int mMonth = calendar.get(Calendar.MONTH);
         int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-        mDialog = new DatePickerDialog(context, this, mYear, mMonth, mDay);
+        mDialog = new DatePickerDialog(context, this, mYear, mMonth, mDay) {
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+            }
+        };
     }
 
     @Override
@@ -84,7 +91,15 @@ public class AppDateEditText extends AppEditText implements DatePickerDialog.OnD
         if (isEmpty()) {
             return true;
         }
-        Date value = FieldUtils.getValue(Date.class, this);
+        Date value = getValue();
         return value != null;
+    }
+
+    public Date getValue() {
+        return FieldUtils.getValue(Date.class, this);
+    }
+
+    public void setValue(Date value) {
+        FieldUtils.setText(this, value);
     }
 }

@@ -2,7 +2,6 @@ package br.com.wasys.cetelem.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.widget.EditText;
@@ -28,9 +27,6 @@ public class LoginActivity extends CetelemActivity {
 
     @BindView(R.id.layout_login) TextInputLayout mLoginTextInputLayout;
     @BindView(R.id.layout_senha) TextInputLayout mSenhaTextInputLayout;
-
-    private Uri mUri;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);

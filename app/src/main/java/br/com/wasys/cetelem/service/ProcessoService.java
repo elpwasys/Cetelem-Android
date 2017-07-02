@@ -61,13 +61,6 @@ public class ProcessoService extends Service {
         return result;
     }
 
-    public static ProcessoPagingModel pesquisar(PesquisaModel pesquisaModel) throws Throwable {
-        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<ProcessoPagingModel> call = endpoint.pesquisar(pesquisaModel);
-        ProcessoPagingModel pagingModel = Endpoint.execute(call);
-        return pagingModel;
-    }
-
     public static DataSet<ProcessoModel, ProcessoMeta> editar(Long id) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
         Call<DataSet<ProcessoModel, ProcessoMeta>> call = endpoint.editar(id);
@@ -90,21 +83,6 @@ public class ProcessoService extends Service {
     }
 
     public static class Async {
-
-        public static Observable<ProcessoPagingModel> pesquisar(final PesquisaModel pesquisaModel) {
-            return Observable.create(new Observable.OnSubscribe<ProcessoPagingModel>() {
-                @Override
-                public void call(Subscriber<? super ProcessoPagingModel> subscriber) {
-                    try {
-                        ProcessoPagingModel pagingModel = ProcessoService.pesquisar(pesquisaModel);
-                        subscriber.onNext(pagingModel);
-                        subscriber.onCompleted();
-                    } catch (Throwable e) {
-                        subscriber.onError(e);
-                    }
-                }
-            });
-        }
 
         public static Observable<ProcessoModel> salvar(final ProcessoModel processoModel) {
             return Observable.create(new Observable.OnSubscribe<ProcessoModel>() {

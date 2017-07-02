@@ -28,6 +28,8 @@ public class AppMoneyEditText extends AppNumberEditText {
     }
 
     private void configure() {
+        setLines(1);
+        setSingleLine(true);
         new MoneyTextWatcher(this);
     }
 

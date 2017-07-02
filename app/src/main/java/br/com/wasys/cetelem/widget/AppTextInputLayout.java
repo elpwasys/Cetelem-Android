@@ -9,6 +9,8 @@ import android.widget.LinearLayout;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
+
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.model.CampoModel;
 import br.com.wasys.library.utils.FieldUtils;
@@ -66,6 +68,7 @@ public class AppTextInputLayout extends TextInputLayout {
         }
 
         mEditText.setHint(mNome);
+        FieldUtils.setText(mEditText, mCampo.valor);
 
         Integer maxLength = campo.tamanhoMaximo;
         if (maxLength != null) {
