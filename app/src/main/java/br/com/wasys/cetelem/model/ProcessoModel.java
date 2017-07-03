@@ -26,13 +26,13 @@ public class ProcessoModel extends Model {
     public ArrayList<CampoGrupoModel> gruposCampos;
 
     public enum Status implements AppSpinner.Option {
-        RASCUNHO (R.string.status_processo_rascunho, R.drawable.processo_status_rascunho),
+        RASCUNHO (R.string.processo_status_rascunho, R.drawable.processo_status_rascunho),
         //AGUARDANDO_ANALISE (R.string.status_processo_aguardando_analise, R.drawable.processo_status_aguardando_analise),
-        EM_ANALISE (R.string.status_processo_em_analise, R.drawable.processo_status_em_analise),
-        PENDENTE (R.string.status_processo_pendente, R.drawable.processo_status_pendente),
+        EM_ANALISE (R.string.processo_status_em_analise, R.drawable.processo_status_em_analise),
+        PENDENTE (R.string.processo_status_pendente, R.drawable.processo_status_pendente),
         //EM_ACOMPANHAMENTO (R.string.status_processo_em_acompanhamento, R.drawable.processo_status_em_acompanhamento),
-        CONCLUIDO (R.string.status_processo_concluido, R.drawable.processo_status_concluido),
-        CANCELADO (R.string.status_processo_cancelado, R.drawable.processo_status_cancelado),
+        CONCLUIDO (R.string.processo_status_concluido, R.drawable.processo_status_concluido),
+        CANCELADO (R.string.processo_status_cancelado, R.drawable.processo_status_cancelado),
         CONCLUIDO_AUTOMATICO (R.string.status_processo_concluido_automatico, R.drawable.processo_status_concluido_automatico);
         public int stringRes;
         public int drawableRes;

@@ -32,13 +32,13 @@
     <string name="msg_sair_conta">Deseja sair da conta?</string>
     <string name="msg_form_invalido">Verifique os campos inválidos ou obrigatórios!</string>
 
-    <string name="status_processo_rascunho">Rascunho</string>
-    <string name="status_processo_aguardando_analise">Aguardando Análise</string>
-    <string name="status_processo_em_analise">Em Análise</string>
-    <string name="status_processo_pendente">Pendente</string>
-    <string name="status_processo_em_acompanhamento">Em Acompanhamento</string>
-    <string name="status_processo_concluido">Concluído</string>
-    <string name="status_processo_cancelado">Cancelado</string>
+    <string name="processo_status_rascunho">Rascunho</string>
+    <string name="processo_status_aguardando_analise">Aguardando Análise</string>
+    <string name="processo_status_em_analise">Em Análise</string>
+    <string name="processo_status_pendente">Pendente</string>
+    <string name="processo_status_em_acompanhamento">Em Acompanhamento</string>
+    <string name="processo_status_concluido">Concluído</string>
+    <string name="processo_status_cancelado">Cancelado</string>
     <string name="tipo_processo">Tipo de processo</string>
     <string name="titulo_processo">Processo</string>
     <string name="title_activity_scan">ScanActivity</string>
@@ -63,6 +63,7 @@
     <string name="atualizar">Atualizar</string>
     <string name="filtro">Filtro</string>
     <string name="procurar">Procurar</string>
+    <string name="documento_versao">Versão %1$d</string>
     <string name="msg_min_size_field">%1$s o tamanho mínimo é %2$d</string>
     <string name="msg_max_size_field">%1$s o tamanho máximo é %2$d</string>
     <string name="status_processo_concluido_automatico">Concluído Automaticamente</string>
@@ -73,5 +74,15 @@
     <string name="limpar">Limpar</string>
     <string name="status_processo">Status do processo</string>
     <string name="msg_processo_salvo_sucesso">Processo salvo com sucesso</string>
+    <string name="titulo_documentos">Documentos</string>
+    <string name="documento_status_incluido">Incluido</string>
+    <string name="documento_status_pendente">Pendente</string>
+    <string name="documento_status_aprovado">Aprovado</string>
+    <string name="documento_status_processando">Processando</string>
+    <string name="documento_status_digitalizado">Digitalizado</string>
+    <string name="opcionais">Opcionais</string>
+    <string name="obrigatorios">Obrigatórios</string>
+    <string name="adicionar">Adicionar</string>
+    <string name="titulo_documento">Documento</string>
 
 </resources>

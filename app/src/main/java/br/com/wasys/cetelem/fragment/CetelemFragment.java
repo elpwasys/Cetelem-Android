@@ -24,4 +24,10 @@ public abstract class CetelemFragment extends AppFragment {
         ActionBar actionBar = activity.getSupportActionBar();
         actionBar.setTitle(id);
     }
+
+    protected void setTitle(String title) {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        ActionBar actionBar = activity.getSupportActionBar();
+        actionBar.setTitle(title);
+    }
 }

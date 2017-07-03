@@ -65,7 +65,6 @@ public class ProcessoNovoFragment extends CetelemFragment {
 
     private static final int REQUEST_SCAN = 1;
 
-
     public static ProcessoNovoFragment newInstance() {
         ProcessoNovoFragment fragment = new ProcessoNovoFragment();
         return fragment;
@@ -96,11 +95,6 @@ public class ProcessoNovoFragment extends CetelemFragment {
                 onTipoDataSetLoad(value);
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         iniciar();
     }
 
@@ -297,6 +291,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
         Intent intent = new Intent(context, DigitalizacaoService.class);
         intent.putExtra(DigitalizacaoService.KEY_PROCESSO, id);
         context.startService(intent);
+        Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
         String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
         FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
         ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();

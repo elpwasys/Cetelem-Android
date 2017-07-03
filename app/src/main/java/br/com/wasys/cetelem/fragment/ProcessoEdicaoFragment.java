@@ -3,20 +3,17 @@ package br.com.wasys.cetelem.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -25,9 +22,9 @@ import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.service.ProcessoService;
-import br.com.wasys.cetelem.widget.AppEditText;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FieldUtils;
+import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -80,11 +77,6 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         if (mId != null) {
             editar(mId);
         }
@@ -100,10 +92,16 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_collection:
-                // ABRIR DOCUMENTOS
+                onAbrirDocumentos();
                 return true;
         }
         return false;
+    }
+
+    private void onAbrirDocumentos() {
+        DocumentoListaFragment fragment = DocumentoListaFragment.newInstance(mId);
+        String backStackName = DocumentoListaFragment.class.getSimpleName();
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
     }
 
     @OnClick(R.id.button_salvar)
