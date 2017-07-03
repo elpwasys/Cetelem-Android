@@ -19,7 +19,7 @@ import android.widget.TextView;
 import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.Usuario;
-import br.com.wasys.cetelem.fragment.ProcessoCadastroFragment;
+import br.com.wasys.cetelem.fragment.ProcessoNovoFragment;
 import br.com.wasys.cetelem.fragment.ProcessoPesquisaFragment;
 import br.com.wasys.library.utils.FieldUtils;
 import br.com.wasys.library.utils.FragmentUtils;
@@ -109,9 +109,9 @@ public class MainActivity extends CetelemActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_plus) {
-            String backStackName = ProcessoCadastroFragment.class.getSimpleName();
+            String backStackName = ProcessoNovoFragment.class.getSimpleName();
             FragmentUtils.popBackStackImmediate(this, backStackName);
-            ProcessoCadastroFragment fragment = ProcessoCadastroFragment.newInstance();
+            ProcessoNovoFragment fragment = ProcessoNovoFragment.newInstance();
             FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
         } else if (id == R.id.nav_search) {
             String backStackName = ProcessoPesquisaFragment.class.getSimpleName();

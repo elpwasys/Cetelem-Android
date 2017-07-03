@@ -4,8 +4,8 @@ import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import br.com.wasys.cetelem.Application;
 import br.com.wasys.cetelem.R;
@@ -22,8 +22,8 @@ public class ProcessoModel extends Model {
     public Date dataCriacao;
     public TipoProcessoModel tipoProcesso;
 
-    public List<UploadModel> uploads;
-    public List<CampoGrupoModel> gruposCampos;
+    public ArrayList<UploadModel> uploads;
+    public ArrayList<CampoGrupoModel> gruposCampos;
 
     public enum Status implements AppSpinner.Option {
         RASCUNHO (R.string.status_processo_rascunho, R.drawable.processo_status_rascunho),

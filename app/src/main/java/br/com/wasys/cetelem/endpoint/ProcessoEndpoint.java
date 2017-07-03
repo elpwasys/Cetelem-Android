@@ -23,7 +23,7 @@ public interface ProcessoEndpoint {
     Call<DataSet<ProcessoModel, ProcessoMeta>> getDataSet();
 
     @GET("processo/editar/{id}")
-    Call<DataSet<ProcessoModel, ProcessoMeta>> editar(@Path("id") Long id);
+    Call<ProcessoModel> editar(@Path("id") Long id);
 
     @GET("processo/tipo/dataset/{id}")
     Call<DataSet<TipoProcessoModel, TipoProcessoMeta>> getTipoDataSet(@Path("id") Long id);

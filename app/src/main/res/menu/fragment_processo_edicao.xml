@@ -7,10 +7,4 @@
         android:title="@string/action_documentos"
         app:showAsAction="always"
         />
-    <item
-        android:id="@+id/action_photo"
-        android:icon="@drawable/ic_bar_add_photo"
-        android:title="@string/action_fotos"
-        app:showAsAction="always"
-        />
 </menu>

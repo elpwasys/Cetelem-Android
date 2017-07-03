@@ -72,5 +72,6 @@
     <string name="numero">Número</string>
     <string name="limpar">Limpar</string>
     <string name="status_processo">Status do processo</string>
+    <string name="msg_processo_salvo_sucesso">Processo salvo com sucesso</string>
 
 </resources>

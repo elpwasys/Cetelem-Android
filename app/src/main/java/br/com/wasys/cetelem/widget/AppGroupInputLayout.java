@@ -156,10 +156,12 @@ public class AppGroupInputLayout extends LinearLayout {
                             if (AppSwitch.isSwitch(opcoes)) {
                                 AppSwitch appSwitch = new AppSwitch(context);
                                 appSwitch.configurar(campo);
+                                appSwitch.setValue(campo.valor);
                                 view = appSwitch;
                             } else {
                                 AppRadioLayout appRadioLayout = new AppRadioLayout(context);
                                 appRadioLayout.configurar(campo);
+                                appRadioLayout.setValue(campo.valor);
                                 view = appRadioLayout;
                             }
                     }

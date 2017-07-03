@@ -12,6 +12,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import br.com.wasys.cetelem.R;
@@ -25,6 +26,7 @@ import br.com.wasys.library.utils.AndroidUtils;
 public class AppRadioLayout extends LinearLayout {
 
     private String mNome;
+    private String[] mValues;
     private CampoModel mCampo;
 
     private TextView mErrorView;
@@ -77,8 +79,8 @@ public class AppRadioLayout extends LinearLayout {
         mRadioGroup.setLayoutParams(radioGroupLayoutParams);
         String opcoes = campo.opcoes;
         if (StringUtils.isNotBlank(opcoes)) {
-            String[] split = opcoes.split(",");
-            for (String opcao : split) {
+            mValues = opcoes.split(",");
+            for (String opcao : mValues) {
                 RadioButton radioButton = new RadioButton(context);
                 radioButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 radioButton.setTag(opcao);
@@ -130,5 +132,15 @@ public class AppRadioLayout extends LinearLayout {
             }
         }
         return null;
+    }
+
+    public void setValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            int index = ArrayUtils.indexOf(mValues, value);
+            if (index > -1) {
+                RadioButton radioButton = (RadioButton) mRadioGroup.getChildAt(index);
+                radioButton.setChecked(true);
+            }
+        }
     }
 }

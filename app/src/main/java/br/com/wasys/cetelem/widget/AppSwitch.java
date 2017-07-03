@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Matcher;
@@ -109,5 +110,17 @@ public class AppSwitch extends LinearLayout {
             return matcher.matches();
         }
         return false;
+    }
+
+
+    public void setValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            boolean checked = false;
+            if (value.matches("(?i)sim")) {
+                checked = true;
+            }
+            Switch aSwitch = (Switch) findViewWithTag(mNome);
+            aSwitch.setChecked(checked);
+        }
     }
 }

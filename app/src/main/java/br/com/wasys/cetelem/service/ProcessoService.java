@@ -61,11 +61,11 @@ public class ProcessoService extends Service {
         return result;
     }
 
-    public static DataSet<ProcessoModel, ProcessoMeta> editar(Long id) throws Throwable {
+    public static ProcessoModel editar(Long id) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<DataSet<ProcessoModel, ProcessoMeta>> call = endpoint.editar(id);
-        DataSet<ProcessoModel, ProcessoMeta> dataSet = Endpoint.execute(call);
-        return dataSet;
+        Call<ProcessoModel> call = endpoint.editar(id);
+        ProcessoModel processoModel = Endpoint.execute(call);
+        return processoModel;
     }
 
     public static DataSet<ProcessoModel, ProcessoMeta> getDataSet() throws Throwable {
@@ -99,13 +99,13 @@ public class ProcessoService extends Service {
             });
         }
 
-        public static Observable<DataSet<ProcessoModel, ProcessoMeta>> editar(final Long id) {
-            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoMeta>>() {
+        public static Observable<ProcessoModel> editar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<ProcessoModel>() {
                 @Override
-                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoMeta>> subscriber) {
+                public void call(Subscriber<? super ProcessoModel> subscriber) {
                     try {
-                        DataSet<ProcessoModel, ProcessoMeta> dataSet = ProcessoService.editar(id);
-                        subscriber.onNext(dataSet);
+                        ProcessoModel processoModel = ProcessoService.editar(id);
+                        subscriber.onNext(processoModel);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);

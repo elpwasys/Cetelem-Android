@@ -52,113 +52,37 @@ import rx.Subscriber;
  * Created by pascke on 24/06/17.
  */
 
-public class ProcessoCadastroFragment extends CetelemFragment {
+public class ProcessoNovoFragment extends CetelemFragment {
 
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
     @BindView(R.id.button_salvar) FloatingActionButton mButtonSalvar;
     @BindView(R.id.spinner_tipo_processo) AppSpinner mSpinnerTipoProcesso;
     @BindView(R.id.layout_spinner) TextInputLayout mSpinnerTextInputLayout;
 
-    private Long mId;
     private ArrayList<Uri> mUris;
     private DataSet<ProcessoModel, ProcessoMeta> mProcessoDataSet;
     private DataSet<TipoProcessoModel, TipoProcessoMeta> mTipoProcessoDataSet;
 
     private static final int REQUEST_SCAN = 1;
 
-    private static final String KEY_ID = ProcessoCadastroFragment.class.getName() + ".id";
-    private static final String KEY_URIS = ProcessoCadastroFragment.class.getName() + ".mUris";
-    private static final String KEY_PROCESSO_DATA_SET = ProcessoCadastroFragment.class.getName() + ".mProcessoDataSet";
-    private static final String KEY_TIPO_PROCESSO_DATA_SET = ProcessoCadastroFragment.class.getName() + ".mTipoProcessoDataSet";
 
-    public static ProcessoCadastroFragment newInstance() {
-        return newInstance(null);
-    }
-
-    public static ProcessoCadastroFragment newInstance(Long id) {
-        ProcessoCadastroFragment fragment = new ProcessoCadastroFragment();
-        if (id != null) {
-            Bundle bundle = new Bundle();
-            bundle.putLong(KEY_ID, id);
-            fragment.setArguments(bundle);
-        }
+    public static ProcessoNovoFragment newInstance() {
+        ProcessoNovoFragment fragment = new ProcessoNovoFragment();
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            if (bundle.containsKey(KEY_ID)) {
-                mId = bundle.getLong(KEY_ID);
-            }
-        }
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_ID)) {
-                mId = savedInstanceState.getLong(KEY_ID);
-            }
-            if (savedInstanceState.containsKey(KEY_URIS)) {
-                mUris = savedInstanceState.getParcelableArrayList(KEY_URIS);
-            }
-            if (savedInstanceState.containsKey(KEY_PROCESSO_DATA_SET)) {
-                mProcessoDataSet = (DataSet<ProcessoModel, ProcessoMeta>) savedInstanceState.getSerializable(KEY_PROCESSO_DATA_SET);
-            }
-            if (savedInstanceState.containsKey(KEY_TIPO_PROCESSO_DATA_SET)) {
-                mTipoProcessoDataSet = (DataSet<TipoProcessoModel, TipoProcessoMeta>) savedInstanceState.getSerializable(KEY_TIPO_PROCESSO_DATA_SET);
-            }
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_processo_cadastro, container, false);
+        View view = inflater.inflate(R.layout.fragment_processo_novo, container, false);
         setTitle(R.string.titulo_processo);
         mUris = new ArrayList<>();
         ButterKnife.bind(this, view);
         return view;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        if (mId != null) {
-            outState.putLong(KEY_ID, mId);
-        }
-        if (mUris != null) {
-            outState.putParcelableArrayList(KEY_URIS, mUris);
-        }
-        if (mProcessoDataSet != null) {
-            outState.putSerializable(KEY_PROCESSO_DATA_SET, mProcessoDataSet);
-        }
-        if (mTipoProcessoDataSet != null) {
-            outState.putSerializable(KEY_TIPO_PROCESSO_DATA_SET, mTipoProcessoDataSet);
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(KEY_ID)) {
-                mId = savedInstanceState.getLong(KEY_ID);
-            }
-            if (savedInstanceState.containsKey(KEY_URIS)) {
-                mUris = savedInstanceState.getParcelableArrayList(KEY_URIS);
-            }
-            if (savedInstanceState.containsKey(KEY_PROCESSO_DATA_SET)) {
-                mProcessoDataSet = (DataSet<ProcessoModel, ProcessoMeta>) savedInstanceState.getSerializable(KEY_PROCESSO_DATA_SET);
-            }
-            if (savedInstanceState.containsKey(KEY_TIPO_PROCESSO_DATA_SET)) {
-                mTipoProcessoDataSet = (DataSet<TipoProcessoModel, TipoProcessoMeta>) savedInstanceState.getSerializable(KEY_TIPO_PROCESSO_DATA_SET);
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        iniciar();
     }
 
     @Override
@@ -175,15 +99,14 @@ public class ProcessoCadastroFragment extends CetelemFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        iniciar();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_processo_cadastro, menu);
-        MenuItem item;
-        if (mId != null) {
-            item = menu.findItem(R.id.action_photo);
-        } else {
-            item = menu.findItem(R.id.action_collection);
-        }
-        item.setVisible(false);
+        inflater.inflate(R.menu.fragment_processo_novo, menu);
     }
 
     @Override
@@ -192,9 +115,6 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         switch (itemId) {
             case R.id.action_photo:
                 openScan();
-                return true;
-            case R.id.action_collection:
-                // ABRIR DOCUMENTOS
                 return true;
         }
         return false;
@@ -235,15 +155,7 @@ public class ProcessoCadastroFragment extends CetelemFragment {
     }
 
     private void iniciar() {
-        if (mProcessoDataSet == null) {
-            if (mId != null) {
-                editar(mId);
-            } else {
-                onDataSetLoad();
-            }
-        } else {
-            onDataSetLoaded(mProcessoDataSet);
-        }
+        onDataSetLoad();
     }
 
     private void onDataSetLoad() {
@@ -267,25 +179,26 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         });
     }
 
-    private void editar(Long id) {
-        showProgress();
-        Observable<DataSet<ProcessoModel, ProcessoMeta>> observable = ProcessoService.Async.editar(id);
-        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoMeta>>() {
-            @Override
-            public void onCompleted() {
-                hideProgress();
+    private void onDataSetLoaded(DataSet<ProcessoModel, ProcessoMeta> dataSet) {
+        mProcessoDataSet = dataSet;
+        if (mProcessoDataSet != null) {
+            ProcessoMeta meta = mProcessoDataSet.meta;
+            ProcessoModel model = dataSet.data;
+            mSpinnerTipoProcesso.setOptions(meta.tiposProcessos);
+            if (model != null) {
+                TipoProcessoMeta tipoProcessoMeta = new TipoProcessoMeta();
+                DataSet<TipoProcessoModel, TipoProcessoMeta> tipoProcessoDataSet = new DataSet<>();
+                tipoProcessoMeta.gruposCampos = model.gruposCampos;
+                tipoProcessoDataSet.data = model.tipoProcesso;
+                tipoProcessoDataSet.meta = tipoProcessoMeta;
+                onTipoDataSetLoaded(tipoProcessoDataSet);
+                mSpinnerTipoProcesso.setValue(model.tipoProcesso.getValue());
             }
-            @Override
-            public void onError(Throwable e) {
-                hideProgress();
-                handle(e);
-            }
-            @Override
-            public void onNext(DataSet<ProcessoModel, ProcessoMeta> dataSet) {
-                hideProgress();
-                onDataSetLoaded(dataSet);
-            }
-        });
+        }
+        int childCount = mLayoutFields.getChildCount();
+        if (childCount == 0) {
+            mSpinnerTipoProcesso.showDropDown();
+        }
     }
 
     private void onTipoDataSetLoad(String value) {
@@ -313,33 +226,14 @@ public class ProcessoCadastroFragment extends CetelemFragment {
         }
     }
 
-    private void onDataSetLoaded(DataSet<ProcessoModel, ProcessoMeta> dataSet) {
-        mProcessoDataSet = dataSet;
-        if (mProcessoDataSet != null) {
-            ProcessoMeta meta = mProcessoDataSet.meta;
-            ProcessoModel model = dataSet.data;
-            mSpinnerTipoProcesso.setOptions(meta.tiposProcessos);
-            if (model != null) {
-                TipoProcessoModel tipoProcesso = model.tipoProcesso;
-                if (tipoProcesso != null) {
-                    // TODO configurar Tipo de Processo no AppSpinner
-                }
-            }
-        }
-        int childCount = mLayoutFields.getChildCount();
-        if (childCount == 0) {
-            mSpinnerTipoProcesso.showDropDown();
-        }
-    }
-
     private void onTipoDataSetLoaded(DataSet<TipoProcessoModel, TipoProcessoMeta> dataSet) {
         mLayoutFields.removeAllViews();
         mTipoProcessoDataSet = dataSet;
         if (mTipoProcessoDataSet != null) {
             TipoProcessoMeta meta = mTipoProcessoDataSet.meta;
-            if (CollectionUtils.isNotEmpty(meta.camposGrupos)) {
+            if (CollectionUtils.isNotEmpty(meta.gruposCampos)) {
                 Context context = getContext();
-                for (CampoGrupoModel grupo : meta.camposGrupos) {
+                for (CampoGrupoModel grupo : meta.gruposCampos) {
                     AppGroupInputLayout campoGrupoLayout = new AppGroupInputLayout(context);
                     campoGrupoLayout.setOrientation(LinearLayout.VERTICAL);
                     campoGrupoLayout.setGrupo(grupo);
@@ -358,7 +252,7 @@ public class ProcessoCadastroFragment extends CetelemFragment {
             processoModel.tipoProcesso = new TipoProcessoModel(tipoProcessoId);
             int childCount = mLayoutFields.getChildCount();
             if (childCount > 0) {
-                List<CampoGrupoModel> grupoModels = new ArrayList<>();
+                ArrayList<CampoGrupoModel> grupoModels = new ArrayList<>();
                 for (int i = 0; i < childCount; i++) {
                     View view = mLayoutFields.getChildAt(i);
                     if (view instanceof AppGroupInputLayout) {
@@ -370,7 +264,7 @@ public class ProcessoCadastroFragment extends CetelemFragment {
                 processoModel.gruposCampos = grupoModels;
             }
             if (CollectionUtils.isNotEmpty(mUris)) {
-                List<UploadModel> uploads = new ArrayList<>(mUris.size());
+                ArrayList<UploadModel> uploads = new ArrayList<>(mUris.size());
                 for (Uri mUri : mUris) {
                     String path = mUri.getPath();
                     uploads.add(new UploadModel(path));

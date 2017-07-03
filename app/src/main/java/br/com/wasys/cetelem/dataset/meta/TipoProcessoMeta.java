@@ -15,7 +15,7 @@ import br.com.wasys.cetelem.model.TipoProcessoModel;
 
 public class TipoProcessoMeta extends Meta {
 
-    public ArrayList<CampoGrupoModel> camposGrupos;
+    public ArrayList<CampoGrupoModel> gruposCampos;
     public ArrayList<TipoDocumentoModel> tiposDocumentos;
 
     public List<TipoDocumentoModel> getTiposDocumentos(Boolean obrigatorio) {
