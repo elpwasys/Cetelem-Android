@@ -29,6 +29,11 @@ public class FragmentUtils {
         transaction.commit();
     }
 
+    public static void popAllBackStackImmediate(FragmentActivity activity) {
+        FragmentManager fragmentManager = activity.getSupportFragmentManager();
+        fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
     public static boolean popBackStackImmediate(FragmentActivity activity, String backStackName) {
         FragmentManager manager = activity.getSupportFragmentManager();
         return manager.popBackStackImmediate(backStackName, FragmentManager.POP_BACK_STACK_INCLUSIVE);

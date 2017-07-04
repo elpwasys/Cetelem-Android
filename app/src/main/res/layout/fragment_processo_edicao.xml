@@ -12,7 +12,18 @@
         android:background="@drawable/bg_caption"
         android:paddingTop="@dimen/activity_padding"
         android:paddingBottom="@dimen/default_padding"
-        >
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/button_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/falha_digitalizacao"
+            android:textColor="@color/red_500"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            style="?android:attr/buttonBarStyle"
+            android:visibility="gone"/>
+            >
         <TextView
             android:id="@+id/text_tipo_processo"
             android:layout_width="match_parent"

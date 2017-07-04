@@ -40,8 +40,8 @@
         <item name="android:textColor">@color/colorAccent</item>
         <item name="android:background">@drawable/bg_section</item>
         <item name="android:layout_marginTop">4dp</item>
-        <item name="android:layout_marginLeft">4dp</item>
-        <item name="android:layout_marginRight">4dp</item>
+        <!--<item name="android:layout_marginLeft">4dp</item>
+        <item name="android:layout_marginRight">4dp</item>-->
         <item name="android:layout_marginBottom">4dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>

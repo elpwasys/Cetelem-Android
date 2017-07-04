@@ -14,6 +14,7 @@ import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.library.enumerator.DeviceHeader;
 import br.com.wasys.library.enumerator.HttpStatus;
+import br.com.wasys.library.enumerator.MediaType;
 import br.com.wasys.library.exception.EndpointException;
 import br.com.wasys.library.http.Error;
 import br.com.wasys.library.utils.AndroidUtils;
@@ -47,6 +48,7 @@ public class Endpoint {
 
     public static <T> T create(Class<T> clazz) {
         Map<String, String> headers = getHeaders();
+        headers.put("Content-Type", MediaType.APPLICATION_JSON.value);
         return br.com.wasys.library.http.Endpoint.create(clazz, BASE_URL, headers);
     }
 

@@ -3,24 +3,30 @@ package br.com.wasys.cetelem.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 
 import br.com.wasys.cetelem.R;
+import br.com.wasys.cetelem.dialog.UplodErrorDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
+import br.com.wasys.cetelem.model.ErrorModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
+import br.com.wasys.cetelem.service.ErrorService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FieldUtils;
@@ -37,11 +43,12 @@ import rx.Subscriber;
 
 public class ProcessoEdicaoFragment extends CetelemFragment {
 
+    @BindView(R.id.button_error) Button mErrorButton;
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
     @BindView(R.id.text_tipo_processo) TextView mTipoProcessoTextView;
 
     private Long mId;
-    private ProcessoModel mProcessoModel;
+    private ProcessoModel mProcesso;
 
     private static final String KEY_ID = ProcessoEdicaoFragment.class.getName() + ".id";
 
@@ -79,6 +86,7 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         super.onViewCreated(view, savedInstanceState);
         if (mId != null) {
             editar(mId);
+            findErrors(mId);
         }
     }
 
@@ -100,8 +108,7 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
 
     private void onAbrirDocumentos() {
         DocumentoListaFragment fragment = DocumentoListaFragment.newInstance(mId);
-        String backStackName = DocumentoListaFragment.class.getSimpleName();
-        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
     }
 
     @OnClick(R.id.button_salvar)
@@ -109,13 +116,27 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         salvar();
     }
 
+    @OnClick(R.id.button_error)
+    public void onErrorClick() {
+        UplodErrorDialog dialog = UplodErrorDialog.newInstance(mId, ErrorModel.Generator.PROCESSO, new UplodErrorDialog.OnUplodErrorListener() {
+            @Override
+            public void onReenviar(boolean answer) {
+                if (answer) {
+                    reenviar();
+                }
+            }
+        });
+        FragmentManager fragmentManager = getFragmentManager();
+        dialog.show(fragmentManager, dialog.getClass().getSimpleName());
+    }
+
     private void popular(ProcessoModel processoModel) {
-        mProcessoModel = processoModel;
-        TipoProcessoModel tipoProcesso = mProcessoModel.tipoProcesso;
+        mProcesso = processoModel;
+        TipoProcessoModel tipoProcesso = mProcesso.tipoProcesso;
         FieldUtils.setText(mTipoProcessoTextView, tipoProcesso.nome);
-        if (CollectionUtils.isNotEmpty(mProcessoModel.gruposCampos)) {
+        if (CollectionUtils.isNotEmpty(mProcesso.gruposCampos)) {
             Context context = getContext();
-            for (CampoGrupoModel grupo : mProcessoModel.gruposCampos) {
+            for (CampoGrupoModel grupo : mProcesso.gruposCampos) {
                 AppGroupInputLayout campoGrupoLayout = new AppGroupInputLayout(context);
                 campoGrupoLayout.setOrientation(LinearLayout.VERTICAL);
                 campoGrupoLayout.setGrupo(grupo);
@@ -145,6 +166,36 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         });
     }
 
+    private void reenviar() {
+
+    }
+
+    private void findErrors(Long id) {
+        String reference = String.valueOf(id);
+        Observable<Boolean> observable = ErrorService.Async.contains(reference, ErrorModel.Action.UPLOAD, ErrorModel.Generator.PROCESSO);
+        prepare(observable).subscribe(new Subscriber<Boolean>() {
+            @Override
+            public void onCompleted() {
+            }
+            @Override
+            public void onError(Throwable e) {
+                handle(e);
+            }
+            @Override
+            public void onNext(Boolean contains) {
+                handleErrors(contains);
+            }
+        });
+    }
+
+    private void handleErrors(Boolean contains) {
+        int visibility = View.GONE;
+        if (BooleanUtils.isTrue(contains)) {
+            visibility = View.VISIBLE;
+        }
+        mErrorButton.setVisibility(visibility);
+    }
+
     private void salvar() {
         boolean valid = validate();
         if (valid) {
@@ -159,10 +210,10 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
                         grupoModels.add(grupoModel);
                     }
                 }
-                mProcessoModel.gruposCampos = grupoModels;
+                mProcesso.gruposCampos = grupoModels;
             }
             showProgress();
-            Observable<ProcessoModel> observable = ProcessoService.Async.salvar(mProcessoModel);
+            Observable<ProcessoModel> observable = ProcessoService.Async.salvar(mProcesso);
             prepare(observable).subscribe(new Subscriber<ProcessoModel>() {
                 @Override
                 public void onCompleted() {

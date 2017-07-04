@@ -41,8 +41,7 @@ public class Endpoint {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request.Builder builder = chain.request()
-                        .newBuilder()
-                        .addHeader("Content-Type", MediaType.APPLICATION_JSON.value);
+                        .newBuilder();
                 if (MapUtils.isNotEmpty(headers)) {
                     Set<Map.Entry<String, String>> entries = headers.entrySet();
                     for (Map.Entry<String, String> entry : entries) {

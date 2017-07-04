@@ -1,8 +1,7 @@
-package br.com.wasys.cetelem.fragment;
+package br.com.wasys.cetelem.dialog;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.os.Process;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -10,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import br.com.wasys.cetelem.R;

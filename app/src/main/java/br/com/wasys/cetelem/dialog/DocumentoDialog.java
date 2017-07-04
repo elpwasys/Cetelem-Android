@@ -1,4 +1,4 @@
-package br.com.wasys.cetelem.fragment;
+package br.com.wasys.cetelem.dialog;
 
 import android.app.Dialog;
 import android.content.Context;

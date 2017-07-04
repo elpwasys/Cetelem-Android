@@ -13,7 +13,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import java.util.List;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.fragment.DocumentoDialog;
+import br.com.wasys.cetelem.dialog.DocumentoDialog;
 import br.com.wasys.library.adapter.ListAdapter;
 import br.com.wasys.library.utils.FieldUtils;
 

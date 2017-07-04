@@ -20,7 +20,6 @@ import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 
 import com.todobom.opennotescanner.OpenNoteScannerActivity;
 import com.viewpagerindicator.CirclePageIndicator;
@@ -37,7 +36,8 @@ import br.com.wasys.cetelem.BuildConfig;
 import br.com.wasys.cetelem.Permission;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ImagePageAdapter;
-import br.com.wasys.cetelem.fragment.DocumentoDialog;
+import br.com.wasys.cetelem.dialog.DocumentoDialog;
+import br.com.wasys.cetelem.model.ImagemModel;
 import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.DateUtils;
@@ -108,7 +108,7 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
         }
         mPassedUris = new ArrayList<>(mUris);
         mMarkedDeleteUris = new ArrayList<>();
-        mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), mUris);
+        mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), ImagemModel.from(mUris));
         int pixels = AndroidUtils.toPixels(this, 16f);
         mViewPager.setPageMargin(pixels);
         mViewPager.addOnPageChangeListener(this);
@@ -227,7 +227,7 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
     }
 
     private void notifyDataSetChanged() {
-        mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), mUris);
+        mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), ImagemModel.from(mUris));
         mViewPager.setAdapter(mImagePageAdapter);
         if (CollectionUtils.isNotEmpty(mUris)) {
             mViewPager.setCurrentItem(mUris.size() - 1);

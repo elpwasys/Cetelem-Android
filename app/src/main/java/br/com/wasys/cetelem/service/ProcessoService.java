@@ -45,6 +45,7 @@ public class ProcessoService extends Service {
                         upload = realm.createObject(Upload.class, path);
                     }
                     model.status = UploadModel.Status.WAITING;
+                    model.sender = UploadModel.Sender.PROCESSO;
                     model.reference = reference;
                     upload.copy(model);
                 }

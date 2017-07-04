@@ -30,6 +30,7 @@ import br.com.wasys.cetelem.activity.DocumentScanActivity;
 import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
+import br.com.wasys.cetelem.dialog.DocumentoDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoDocumentoModel;
@@ -51,7 +52,6 @@ import rx.Subscriber;
 /**
  * Created by pascke on 24/06/17.
  */
-
 public class ProcessoNovoFragment extends CetelemFragment {
 
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
@@ -68,11 +68,6 @@ public class ProcessoNovoFragment extends CetelemFragment {
     public static ProcessoNovoFragment newInstance() {
         ProcessoNovoFragment fragment = new ProcessoNovoFragment();
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -108,7 +103,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_photo:
-                openScan();
+                openScanner();
                 return true;
         }
         return false;
@@ -138,7 +133,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
         salvar();
     }
 
-    private void openScan() {
+    private void openScanner() {
         Context context = getContext();
         ArrayList<TipoDocumentoModel> documentos = null;
         if (mTipoProcessoDataSet != null) {
@@ -287,10 +282,9 @@ public class ProcessoNovoFragment extends CetelemFragment {
     }
 
     private void startService(Long id) {
-        Context context = getBaseContext();
-        Intent intent = new Intent(context, DigitalizacaoService.class);
-        intent.putExtra(DigitalizacaoService.KEY_PROCESSO, id);
-        context.startService(intent);
+        Context context = getContext();
+        DigitalizacaoService.start(context, id);
+
         Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
         String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
         FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
@@ -336,13 +330,13 @@ public class ProcessoNovoFragment extends CetelemFragment {
                 if (!display) {
                     FragmentActivity activity = getActivity();
                     Toast.makeText(activity, R.string.msg_required_documents, Toast.LENGTH_LONG).show();
-                    openScan();
+                    openScanner();
                 } else {
                     DocumentoDialog dialog = DocumentoDialog.newInstance(meta.tiposDocumentos, new DocumentoDialog.OnDismissListener() {
                         @Override
                         public void onDismiss(boolean answer, boolean displayMore) {
                             if (answer) {
-                                openScan();
+                                openScanner();
                             }
                             PreferencesUtils.put(key, displayMore);
                         }

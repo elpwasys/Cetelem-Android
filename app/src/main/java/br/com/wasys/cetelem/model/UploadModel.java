@@ -5,6 +5,7 @@ import android.support.annotation.StringRes;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import br.com.wasys.cetelem.R;
@@ -18,7 +19,9 @@ import io.realm.RealmResults;
 
 public class UploadModel {
 
+    public Date date;
     public String path;
+    public Sender sender;
     public Status status;
     public String reference;
 
@@ -28,6 +31,11 @@ public class UploadModel {
 
     public UploadModel(String path) {
         this.path = path;
+    }
+
+    public enum Sender {
+        PROCESSO,
+        DOCUMENTO
     }
 
     public enum Status {
@@ -45,8 +53,10 @@ public class UploadModel {
             return null;
         }
         UploadModel model = new UploadModel();
+        model.date = upload.date;
         model.path = upload.path;
         model.reference = upload.reference;
+        model.sender = TypeUtils.parse(Sender.class, upload.sender);
         model.status = TypeUtils.parse(Status.class, upload.status);
         return model;
     }

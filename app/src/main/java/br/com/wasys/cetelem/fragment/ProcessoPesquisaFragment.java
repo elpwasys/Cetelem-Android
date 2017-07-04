@@ -21,6 +21,7 @@ import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ProcessoAdapter;
 import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
+import br.com.wasys.cetelem.dialog.FiltroDialog;
 import br.com.wasys.cetelem.model.FiltroModel;
 import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;

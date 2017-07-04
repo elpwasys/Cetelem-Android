@@ -109,13 +109,13 @@ public class MainActivity extends CetelemActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_plus) {
+            FragmentUtils.popAllBackStackImmediate(this);
             String backStackName = ProcessoNovoFragment.class.getSimpleName();
-            FragmentUtils.popBackStackImmediate(this, backStackName);
             ProcessoNovoFragment fragment = ProcessoNovoFragment.newInstance();
             FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
         } else if (id == R.id.nav_search) {
+            FragmentUtils.popAllBackStackImmediate(this);
             String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
-            FragmentUtils.popBackStackImmediate(this, backStackName);
             ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();
             FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
         } else if (id == R.id.nav_power) {

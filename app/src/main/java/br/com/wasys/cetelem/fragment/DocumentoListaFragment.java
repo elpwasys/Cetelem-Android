@@ -28,7 +28,6 @@ import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.activity.DocumentScanActivity;
 import br.com.wasys.cetelem.adapter.DocumentoListAdapter;
 import br.com.wasys.cetelem.model.DocumentoModel;
-import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.cetelem.service.DocumentoService;
 import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
@@ -69,7 +68,6 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                 mId = bundle.getLong(KEY_ID);
             }
         }
-        mUris = new ArrayList<>();
     }
 
     @Override
@@ -83,6 +81,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mUris = new ArrayList<>();
         mListView.setOnChildClickListener(this);
         listar();
     }
@@ -97,7 +96,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_add:
-                openScan();
+                openScanner();
                 return true;
             case R.id.action_refresh:
                 listar();
@@ -120,32 +119,32 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
-            if (CollectionUtils.isNotEmpty(mUris)) {
-                for (Uri uri : mUris) {
-                    File file = new File(uri.getPath());
-                    if (file.exists()) {
-                        file.delete();
-                    }
+            deleteFiles();
+        }
+    }
+
+    private void deleteFiles() {
+        if (CollectionUtils.isNotEmpty(mUris)) {
+            for (Uri uri : mUris) {
+                String path = uri.getPath();
+                File file = new File(path);
+                if (file.exists()) {
+                    file.delete();
                 }
             }
-            mUris = new ArrayList<>();
         }
+        mUris.clear();
     }
 
-    private void listar() {
-        if (mId != null) {
-            listar(mId);
-        }
-    }
-
-    private void openScan() {
+    // ABRE O SCANNER
+    private void openScanner() {
         Context context = getContext();
-        ArrayList<TipoDocumentoModel> documentos = null;
         Intent intent = DocumentScanActivity.newIntent(context, new ArrayList<>(mUris), null);
         startActivityForResult(intent, REQUEST_SCAN);
     }
 
-    private void atualizar(List<DocumentoModel> models) {
+    // POPULA A LISTA DE DOCUMENTOS
+    private void popular(List<DocumentoModel> models) {
         List<DocumentoModel> opcionais = new ArrayList<>();
         List<DocumentoModel> obrigatorios = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(models)) {
@@ -166,27 +165,31 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         }
     }
 
-    private void listar(Long id) {
-        showProgress();
-        Observable<List<DocumentoModel>> observable = DocumentoService.Async.listar(id);
-        prepare(observable).subscribe(new Subscriber<List<DocumentoModel>>() {
-            @Override
-            public void onCompleted() {
-                hideProgress();
-            }
-            @Override
-            public void onError(Throwable e) {
-                hideProgress();
-                handle(e);
-            }
-            @Override
-            public void onNext(List<DocumentoModel> models) {
-                hideProgress();
-                atualizar(models);
-            }
-        });
+    // BUSCA A LISTA DE DOCUMENTOS NO SERVIDOR
+    private void listar() {
+        if (mId != null) {
+            showProgress();
+            Observable<List<DocumentoModel>> observable = DocumentoService.Async.listar(mId);
+            prepare(observable).subscribe(new Subscriber<List<DocumentoModel>>() {
+                @Override
+                public void onCompleted() {
+                    hideProgress();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    hideProgress();
+                    handle(e);
+                }
+                @Override
+                public void onNext(List<DocumentoModel> models) {
+                    hideProgress();
+                    popular(models);
+                }
+            });
+        }
     }
 
+    // LISTENER PARA OBTER O DOCUMENTO DA LISTA SELECIONADO
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
         DocumentoListAdapter.Group group = mGroups.get(groupPosition);

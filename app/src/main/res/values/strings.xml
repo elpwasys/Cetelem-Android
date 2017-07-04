@@ -84,5 +84,14 @@
     <string name="obrigatorios">Obrigatórios</string>
     <string name="adicionar">Adicionar</string>
     <string name="titulo_documento">Documento</string>
+    <string name="excluir">Excluir</string>
+    <string name="msg_deseja_excluir_registro">Deseja excluir este registro?</string>
+    <string name="msg_erro_digitalizacao">Erro na digitalização</string>
+    <string name="falha_digitalizacao">Falha ao digitalizar os documentos deste processo.\nClique aqui.</string>
+    <string name="title_erro">Erro</string>
+    <string name="data">Data</string>
+    <string name="mensagem">Mensagem</string>
+    <string name="documento">Documento</string>
+    <string name="reenviar">Reenviar</string>
 
 </resources>

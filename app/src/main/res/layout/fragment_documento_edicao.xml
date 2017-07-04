@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/activity_padding"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="br.com.wasys.cetelem.fragment.DocumentoEdicaoFragment">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="@dimen/activity_padding"
         android:orientation="horizontal">
         <ImageView
             android:id="@+id/image_view_status"
@@ -51,4 +52,59 @@
                 android:textAppearance="@android:style/TextAppearance.Small" />
         </LinearLayout>
     </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/black">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="@dimen/activity_padding"/>
+            <com.viewpagerindicator.CirclePageIndicator
+                android:id="@+id/indicator"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                app:fillColor="@color/colorPrimary"
+                app:strokeColor="@color/colorPrimary"/>
+        </LinearLayout>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_camera"
+            app:fabSize="mini"
+            app:backgroundTint="@android:color/white"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_salvar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_save"
+            android:tint="@android:color/white"
+            app:backgroundTint="@color/colorPrimary"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:layout_marginRight="@dimen/fab_margin"
+            android:layout_marginLeft="@dimen/fab_margin"
+            android:layout_marginBottom="32dp"
+            android:src="@drawable/ic_delete"
+            android:tint="@android:color/holo_red_dark"
+
+            app:fabSize="mini"
+            app:backgroundTint="@android:color/white"/>
+    </FrameLayout>
 </LinearLayout>
