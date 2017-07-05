@@ -40,14 +40,25 @@ public class ImagePageAdapter extends FragmentStatePagerAdapter {
         return CollectionUtils.size(mModels);
     }
 
-    public void deleteAt(int position) {
+    public List<ImagemModel> getModels() {
+        return mModels;
+    }
+
+    public ImagemModel getModelAt(int position) {
+        if (CollectionUtils.size(mModels) > position) {
+            return mModels.get(position);
+        }
+        return null;
+    }
+
+    public void deleteModelAt(int position) {
         if (CollectionUtils.size(mModels) > position) {
             mModels.remove(position);
             notifyDataSetChanged();
         }
     }
 
-    public void setModel(ImagemModel model) {
+    public void addModel(ImagemModel model) {
         if (mModels == null) {
             mModels = new ArrayList<>();
         }

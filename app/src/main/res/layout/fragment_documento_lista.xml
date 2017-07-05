@@ -2,7 +2,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="br.com.wasys.cetelem.fragment.DocumentoListaFragment">
+    <TextView
+        android:id="@+id/text_pendencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:padding="@dimen/activity_padding"
+        android:textColor="@android:color/white"
+        android:background="@color/red_pending"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:visibility="gone"
+        />
     <ExpandableListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"

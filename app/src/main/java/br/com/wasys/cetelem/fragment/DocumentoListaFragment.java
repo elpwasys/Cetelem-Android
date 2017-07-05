@@ -8,7 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -27,20 +31,32 @@ import java.util.List;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.activity.DocumentScannerActivity;
 import br.com.wasys.cetelem.adapter.DocumentoListAdapter;
+import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dialog.PendenciaDialog;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.DocumentoModel;
+import br.com.wasys.cetelem.model.JustificativaModel;
+import br.com.wasys.cetelem.model.ProcessoLogModel;
+import br.com.wasys.cetelem.model.ResultModel;
+import br.com.wasys.cetelem.model.UploadModel;
+import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.DocumentoService;
+import br.com.wasys.library.utils.FieldUtils;
 import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Subscriber;
 
+import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitalizacaoService;
+
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DocumentoListaFragment extends CetelemFragment implements ExpandableListView.OnChildClickListener {
+public class DocumentoListaFragment extends CetelemFragment implements ExpandableListView.OnChildClickListener, DocumentoListAdapter.DocumentoListAdapterListener {
 
     @BindView(R.id.list_view) ExpandableListView mListView;
+    @BindView(R.id.text_pendencia) TextView mPendenciaTextView;
 
     private Long mId;
     private ArrayList<Uri> mUris;
@@ -82,7 +98,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         super.onViewCreated(view, savedInstanceState);
         mUris = new ArrayList<>();
         mListView.setOnChildClickListener(this);
-        listar();
+        startAsyncDataSet();
     }
 
     @Override
@@ -98,7 +114,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                 openScanner();
                 return true;
             case R.id.action_refresh:
-                listar();
+                startAsyncDataSet();
                 return true;
         }
         return false;
@@ -113,6 +129,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                     if (mUris == null) {
                         mUris = new ArrayList<>();
                     }
+                    startAsyncSalvar();
                     break;
                 }
             }
@@ -120,6 +137,31 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         else if (resultCode == Activity.RESULT_CANCELED) {
             deleteFiles();
         }
+    }
+
+    // LISTENER PARA OBTER O DOCUMENTO DA LISTA SELECIONADO
+    @Override
+    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+        DocumentoListAdapter.Group group = mGroups.get(groupPosition);
+        DocumentoModel documentoModel = group.getAt(childPosition);
+        DocumentoEdicaoFragment fragment = DocumentoEdicaoFragment.newInstance(documentoModel.id);
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
+        return true;
+    }
+
+    @Override
+    public void onReplayClick(final DocumentoModel documento) {
+        PendenciaDialog dialog = PendenciaDialog.newInstance(documento, new PendenciaDialog.OnPendenciaDialogListener() {
+            @Override
+            public void onJustificar(String justificativa) {
+                JustificativaModel justificativaModel = new JustificativaModel();
+                justificativaModel.id = documento.id;
+                justificativaModel.texto = justificativa;
+                startAsyncJustificar(justificativaModel);
+            }
+        });
+        FragmentManager manager = getFragmentManager();
+        dialog.show(manager, dialog.getClass().getSimpleName());
     }
 
     private void deleteFiles() {
@@ -143,11 +185,19 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     }
 
     // POPULA A LISTA DE DOCUMENTOS
-    private void popular(List<DocumentoModel> models) {
+    private void onAsyncDataSetCompleted(DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet) {
+
+        ProcessoLogModel meta = dataSet.meta;
+        if (meta != null) {
+            FieldUtils.setText(mPendenciaTextView, meta.observacao);
+            mPendenciaTextView.setVisibility(View.VISIBLE);
+        }
+
+        ArrayList<DocumentoModel> data = dataSet.data;
         List<DocumentoModel> opcionais = new ArrayList<>();
         List<DocumentoModel> obrigatorios = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(models)) {
-            for (DocumentoModel model : models) {
+        if (CollectionUtils.isNotEmpty(data)) {
+            for (DocumentoModel model : data) {
                 if (BooleanUtils.isTrue(model.obrigatorio)) {
                     obrigatorios.add(model);
                 } else {
@@ -156,20 +206,39 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
             }
         }
         mGroups = new ArrayList<>();
-        mGroups.add(new DocumentoListAdapter.Group(R.string.obrigatorios, obrigatorios));
-        mGroups.add(new DocumentoListAdapter.Group(R.string.opcionais, opcionais));
-        mListView.setAdapter(new DocumentoListAdapter(getContext(), mGroups));
+        if (CollectionUtils.isNotEmpty(obrigatorios)) {
+            mGroups.add(new DocumentoListAdapter.Group(R.string.obrigatorios, obrigatorios));
+        }
+        if (CollectionUtils.isNotEmpty(opcionais)) {
+            mGroups.add(new DocumentoListAdapter.Group(R.string.opcionais, opcionais));
+        }
+        DocumentoListAdapter adapter = new DocumentoListAdapter(getContext(), mGroups);
+        adapter.setDocumentoListAdapterListener(this);
+        mListView.setAdapter(adapter);
         for (int i = 0; i < mGroups.size(); i++) {
             mListView.expandGroup(i);
         }
     }
 
+    private void onAsyncJustificarCompleted(ResultModel model) {
+        Toast.makeText(getContext(), R.string.msg_justificativa_sucesso, Toast.LENGTH_LONG).show();
+        startAsyncDataSet();
+    }
+
+    private void asyncSalvarCompleted(DigitalizacaoModel model) {
+        if (model != null) {
+            startDigitalizacaoService(getContext(), model.tipo, model.referencia);
+            Snackbar.make(getView(), getString(R.string.msg_processo_salvo_sucesso), Snackbar.LENGTH_LONG).show();
+            startAsyncDataSet();
+        }
+    }
+
     // BUSCA A LISTA DE DOCUMENTOS NO SERVIDOR
-    private void listar() {
+    private void startAsyncDataSet() {
         if (mId != null) {
             showProgress();
-            Observable<List<DocumentoModel>> observable = DocumentoService.Async.listar(mId);
-            prepare(observable).subscribe(new Subscriber<List<DocumentoModel>>() {
+            Observable<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> observable = DocumentoService.Async.getDataSet(mId);
+            prepare(observable).subscribe(new Subscriber<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>>() {
                 @Override
                 public void onCompleted() {
                     hideProgress();
@@ -180,21 +249,61 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                     handle(e);
                 }
                 @Override
-                public void onNext(List<DocumentoModel> models) {
+                public void onNext(DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet) {
                     hideProgress();
-                    popular(models);
+                    onAsyncDataSetCompleted(dataSet);
                 }
             });
         }
     }
 
-    // LISTENER PARA OBTER O DOCUMENTO DA LISTA SELECIONADO
-    @Override
-    public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-        DocumentoListAdapter.Group group = mGroups.get(groupPosition);
-        DocumentoModel documentoModel = group.getAt(childPosition);
-        DocumentoEdicaoFragment fragment = DocumentoEdicaoFragment.newInstance(documentoModel.id);
-        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
-        return true;
+    private void startAsyncSalvar() {
+        if (CollectionUtils.isNotEmpty(mUris)) {
+            ArrayList<UploadModel> uploads = new ArrayList<>(mUris.size());
+            for (Uri mUri : mUris) {
+                String path = mUri.getPath();
+                uploads.add(new UploadModel(path));
+            }
+            showProgress();
+            String referencia = String.valueOf(mId);
+            Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.criar(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, uploads);
+            prepare(observable).subscribe(new Subscriber<DigitalizacaoModel>() {
+                @Override
+                public void onCompleted() {
+                    hideProgress();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    hideProgress();
+                    handle(e);
+                }
+                @Override
+                public void onNext(DigitalizacaoModel model) {
+                    hideProgress();
+                    asyncSalvarCompleted(model);
+                }
+            });
+        }
+    }
+
+    private void startAsyncJustificar(JustificativaModel justificativaModel) {
+        showProgress();
+        Observable<ResultModel> observable = DocumentoService.Async.justificar(justificativaModel);
+        prepare(observable).subscribe(new Subscriber<ResultModel>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(ResultModel model) {
+                hideProgress();
+                onAsyncJustificarCompleted(model);
+            }
+        });
     }
 }

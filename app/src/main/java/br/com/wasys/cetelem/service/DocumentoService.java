@@ -1,10 +1,14 @@
 package br.com.wasys.cetelem.service;
 
-import java.util.List;
+import java.util.ArrayList;
 
+import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.endpoint.DocumentoEndpoint;
 import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.model.DocumentoModel;
+import br.com.wasys.cetelem.model.JustificativaModel;
+import br.com.wasys.cetelem.model.ProcessoLogModel;
+import br.com.wasys.cetelem.model.ResultModel;
 import br.com.wasys.library.service.Service;
 import retrofit2.Call;
 import rx.Observable;
@@ -22,11 +26,18 @@ public class DocumentoService extends Service {
         return model;
     }
 
-    public static List<DocumentoModel> listar(Long id) throws Throwable {
+    public static ResultModel justificar(JustificativaModel justificativaModel) throws Throwable {
         DocumentoEndpoint endpoint = Endpoint.create(DocumentoEndpoint.class);
-        Call<List<DocumentoModel>> call = endpoint.listar(id);
-        List<DocumentoModel> models = Endpoint.execute(call);
-        return models;
+        Call<ResultModel> call = endpoint.justificar(justificativaModel);
+        ResultModel model = Endpoint.execute(call);
+        return model;
+    }
+
+    public static DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> getDataSet(Long id) throws Throwable {
+        DocumentoEndpoint endpoint = Endpoint.create(DocumentoEndpoint.class);
+        Call<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> call = endpoint.getDataSet(id);
+        DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet = Endpoint.execute(call);
+        return dataSet;
     }
 
     public static class Async {
@@ -44,13 +55,27 @@ public class DocumentoService extends Service {
                 }
             });
         }
-        public static Observable<List<DocumentoModel>> listar(final Long id) {
-            return Observable.create(new Observable.OnSubscribe<List<DocumentoModel>>() {
+        public static Observable<ResultModel> justificar(final JustificativaModel justificativaModel) {
+            return Observable.create(new Observable.OnSubscribe<ResultModel>() {
                 @Override
-                public void call(Subscriber<? super List<DocumentoModel>> subscriber) {
+                public void call(Subscriber<? super ResultModel> subscriber) {
                     try {
-                        List<DocumentoModel> models = DocumentoService.listar(id);
-                        subscriber.onNext(models);
+                        ResultModel resultModel = DocumentoService.justificar(justificativaModel);
+                        subscriber.onNext(resultModel);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+        public static Observable<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> getDataSet(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>>() {
+                @Override
+                public void call(Subscriber<? super DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> subscriber) {
+                    try {
+                        DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet = DocumentoService.getDataSet(id);
+                        subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);

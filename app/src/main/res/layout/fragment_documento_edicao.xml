@@ -91,7 +91,8 @@
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_save"
             android:tint="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"/>
+            app:backgroundTint="@color/colorPrimary"
+            android:visibility="gone"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_delete"
             android:layout_width="wrap_content"
@@ -103,7 +104,7 @@
             android:layout_marginBottom="32dp"
             android:src="@drawable/ic_delete"
             android:tint="@android:color/holo_red_dark"
-
+            android:visibility="gone"
             app:fabSize="mini"
             app:backgroundTint="@android:color/white"/>
     </FrameLayout>

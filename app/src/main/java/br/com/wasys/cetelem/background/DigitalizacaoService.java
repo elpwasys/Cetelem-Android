@@ -41,10 +41,12 @@ import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.model.ArquivoModel;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ResultModel;
+import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.cetelem.realm.Arquivo;
 import br.com.wasys.cetelem.realm.Digitalizacao;
 import br.com.wasys.library.exception.AppException;
 import br.com.wasys.library.utils.JacksonUtils;
+import br.com.wasys.library.utils.TypeUtils;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmQuery;
@@ -59,7 +61,8 @@ public class DigitalizacaoService extends Service {
     private ServiceHandler mHandler;
 
     private static final String TAG = "Digitalizacao";
-    private static final String KEY_REFERENCE = DigitalizacaoService.class.getName() + ".id";
+    private static final String KEY_TIPO = DigitalizacaoService.class.getName() + ".tipo";
+    private static final String KEY_REFERENCIA = DigitalizacaoService.class.getName() + ".reference";
 
     // HANDLER PARA EXECUCAO DO SERVICO
     private final class ServiceHandler extends Handler {
@@ -70,8 +73,12 @@ public class DigitalizacaoService extends Service {
         public void handleMessage(Message msg) {
             try {
                 Bundle data = msg.getData();
-                long id = data.getLong(KEY_REFERENCE);
-                digitalizar(id);
+                String name = data.getString(KEY_TIPO);
+                String referencia = data.getString(KEY_REFERENCIA);
+                DigitalizacaoModel.Tipo tipo = TypeUtils.parse(DigitalizacaoModel.Tipo.class, name);
+                if (tipo != null && StringUtils.isNotBlank(referencia)) {
+                    digitalizar(tipo, referencia);
+                }
             } finally {
                 stopSelf(msg.arg1);
             }
@@ -87,9 +94,10 @@ public class DigitalizacaoService extends Service {
     }
 
     // METODO PARA INICIAR O PROCESSO
-    public static void start(Context context, Long id) {
+    public static void startDigitalizacaoService(Context context, DigitalizacaoModel.Tipo tipo, String referencia) {
         Intent intent = new Intent(context, DigitalizacaoService.class);
-        intent.putExtra(DigitalizacaoService.KEY_REFERENCE, id);
+        intent.putExtra(DigitalizacaoService.KEY_TIPO, tipo.name());
+        intent.putExtra(DigitalizacaoService.KEY_REFERENCIA, referencia);
         context.startService(intent);
     }
 
@@ -103,37 +111,36 @@ public class DigitalizacaoService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            final long id = intent.getLongExtra(KEY_REFERENCE, 0);
-            if (id > 0) {
-                // OBTEM A MENSAGEM
-                Message message = mHandler.obtainMessage();
-                message.arg1 = startId;
-                // BUNDLE DE PARAMETROS
-                Bundle data = new Bundle();
-                data.putLong(KEY_REFERENCE, id);
-                message.setData(data);
-                // ENVIA A MENSAGEM PARA SER PROCESSADA
-                mHandler.sendMessage(message);
-                // REINICIA CASO MORTO
-                return START_STICKY;
-            }
+            String tipo = intent.getStringExtra(KEY_TIPO);
+            String referencia = intent.getStringExtra(KEY_REFERENCIA);
+            // OBTEM A MENSAGEM
+            Message message = mHandler.obtainMessage();
+            message.arg1 = startId;
+            // BUNDLE DE PARAMETROS
+            Bundle data = new Bundle();
+            data.putString(KEY_TIPO, tipo);
+            data.putString(KEY_REFERENCIA, referencia);
+            message.setData(data);
+            // ENVIA A MENSAGEM PARA SER PROCESSADA
+            mHandler.sendMessage(message);
+            // REINICIA CASO MORTO
+            return START_STICKY;
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void digitalizar(Long id) {
-        Log.d(TAG, "Iniciando a digitalizacao do processo id " + id + "...");
-        String referencia = String.valueOf(id);
-        DigitalizacaoModel model = find(referencia, DigitalizacaoModel.Status.ERRO, DigitalizacaoModel.Status.AGUARDANDO);
+    private void digitalizar(DigitalizacaoModel.Tipo tipo, String referencia) {
+        Log.d(TAG, "Iniciando digitalizacao " + referencia + "...");
+        DigitalizacaoModel model = find(tipo, referencia, DigitalizacaoModel.Status.ERRO, DigitalizacaoModel.Status.AGUARDANDO);
         if (model != null) {
             try {
                 update(model.id, DigitalizacaoModel.Status.ENVIANDO);
-                upload(id, model.arquivos);
+                upload(tipo, referencia, model.arquivos);
                 delete(model.id);
                 update(model.id, DigitalizacaoModel.Status.ENVIADO);
-                Log.d(TAG, "Sucesso na digitalizacao do processo id " + id + ".");
+                Log.d(TAG, "Sucesso na digitalizacao " + referencia + ".");
             } catch (Throwable throwable) {
-                Log.e(TAG, "Erro na digitalizacao do processo id " + id + ".", throwable);
+                Log.e(TAG, "Erro na digitalizacao " + referencia + ".", throwable);
                 String message = throwable.getMessage();
                 if (!(throwable instanceof AppException)) {
                     Throwable rootCause = ExceptionUtils.getRootCause(throwable);
@@ -150,13 +157,13 @@ public class DigitalizacaoService extends Service {
                 update(model.id, DigitalizacaoModel.Status.ERRO, message);
             }
         }
-        Log.d(TAG, "Digitalizacao do processo id " + id + " finalizado.");
+        Log.d(TAG, "Digitalizacao " + referencia + " finalizado.");
     }
 
     private void delete(Long id) {
         Realm realm = Realm.getDefaultInstance();
         try {
-            Log.d(TAG, "Listando registros de arquivos da digitalizacao id " + id + " para excluir...");
+            Log.d(TAG, "Listando registros de arquivos da digitalizacao para excluir...");
             Digitalizacao digitalizacao = realm.where(Digitalizacao.class)
                     .equalTo("id", id)
                     .findFirst();
@@ -182,7 +189,7 @@ public class DigitalizacaoService extends Service {
                 Log.d(TAG, "Sucesso na exclusao dos arquivos fisicos.");
             }
         } catch (Throwable e) {
-            Log.e(TAG, "Falha na exclusao dos registros da digitalizacao id " + id + ".", e);
+            Log.e(TAG, "Falha na exclusao dos registros da digitalizacao.", e);
             throw e;
         } finally {
             realm.close();
@@ -196,7 +203,7 @@ public class DigitalizacaoService extends Service {
     private void update(Long id, DigitalizacaoModel.Status status, String mensagem) {
         Realm realm = Realm.getDefaultInstance();
         try {
-            Log.d(TAG, "Atualizando status da digitalizacao id " + id + " para " + status.name() + "...");
+            Log.d(TAG, "Atualizando status da digitalizacao para " + status.name() + "...");
             Digitalizacao digitalizacao = realm.where(Digitalizacao.class)
                     .equalTo("id", id)
                     .findFirst();
@@ -213,27 +220,27 @@ public class DigitalizacaoService extends Service {
                 digitalizacao.dataHoraRetorno = data;
             }
             realm.commitTransaction();
-            Log.d(TAG, "Sucesso na atualizacao da digitalizacao id " + id + ".");
+            Log.d(TAG, "Sucesso na atualizacao da digitalizacao.");
         } catch (Throwable e) {
-            Log.e(TAG, "Falha na atualizacao da digitalizacao id " + id + ".", e);
+            Log.e(TAG, "Falha na atualizacao da digitalizacao.", e);
             throw e;
         } finally {
             realm.close();
         }
     }
 
-    private DigitalizacaoModel find(String referencia, DigitalizacaoModel.Status... status) {
+    private DigitalizacaoModel find(DigitalizacaoModel.Tipo tipo, String referencia, DigitalizacaoModel.Status... status) {
         String[] names = new String[status.length];
         for (int i = 0; i < status.length; i++) {
             names[i] = status[i].name();
         }
         String join = StringUtils.join(status, ", ");
-        Log.d(TAG, "Buscando digitalizacao referencia " + referencia + " status [" + join + "]...");
+        Log.d(TAG, "Buscando digitalizacao " + referencia + " status [" + join + "]...");
         Realm realm = Realm.getDefaultInstance();
         try {
             RealmQuery<Digitalizacao> query = realm.where(Digitalizacao.class)
-                    .equalTo("referencia", referencia)
-                    .equalTo("tipo", DigitalizacaoModel.Tipo.TIPIFICACAO.name());
+                    .equalTo("tipo", tipo.name())
+                    .equalTo("referencia", referencia);
             for (int i = 0; i < status.length; i++) {
                 if (i > 0) {
                     query.or();
@@ -242,21 +249,21 @@ public class DigitalizacaoService extends Service {
             }
             Digitalizacao digitalizacao = query.findFirst();
             DigitalizacaoModel digitalizacaoModel = DigitalizacaoModel.from(digitalizacao);
-            Log.d(TAG, "Sucesso na busca da digitalizacao referencia " + referencia + " status [" + join + "].");
+            Log.d(TAG, "Sucesso na busca da digitalizacao " + referencia + " status [" + join + "].");
             return digitalizacaoModel;
         } catch (Throwable e) {
-            Log.e(TAG, "Falha na busca da digitalizacao referencia " + referencia + " status [" + join + "].", e);
+            Log.e(TAG, "Falha na busca da digitalizacao " + referencia + " status [" + join + "].", e);
             throw e;
         } finally {
             realm.close();
         }
     }
 
-    private void upload(Long id, List<ArquivoModel> models) throws Throwable {
+    private void upload(DigitalizacaoModel.Tipo tipo, String referencia, List<ArquivoModel> models) throws Throwable {
 
         if (CollectionUtils.isNotEmpty(models)) {
 
-            Log.d(TAG, "Iniciando o upload das imagens do processo " + id + "....");
+            Log.d(TAG, "Iniciando o upload dos arquivos da digitalizacao " + referencia + "....");
 
             Log.d(TAG, "Listando imagens para enviar...");
             List<File> files = new ArrayList<>(models.size());
@@ -274,7 +281,14 @@ public class DigitalizacaoService extends Service {
 
                 Map<String, String> headers = Endpoint.getHeaders();
 
-                String spec = BuildConfig.BASE_URL + "processo/digitalizar";
+                String spec = BuildConfig.BASE_URL;
+                if (DigitalizacaoModel.Tipo.DOCUMENTO.equals(tipo)) {
+                    spec += BuildConfig.DIGITALIZACAO_DOCUMENTO_PATH;
+                } else {
+                    spec += BuildConfig.DIGITALIZACAO_TIPIFICACAO_PATH;
+                }
+
+
                 URL url = new URL(spec);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -298,7 +312,9 @@ public class DigitalizacaoService extends Service {
                 OutputStream outputStream = connection.getOutputStream();
                 DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
 
-                dataOutputStream.writeLong(id); // ID DO PROCESSO
+                Long id = Long.valueOf(referencia);
+
+                dataOutputStream.writeLong(id); // ID DO PROCESSO OU DOCUMENTO
                 dataOutputStream.writeInt(files.size()); // QUANTIDADE DE IMAGENS
 
                 Log.d(TAG, "Quantidade de imagens para enviar " + files.size() + ".");

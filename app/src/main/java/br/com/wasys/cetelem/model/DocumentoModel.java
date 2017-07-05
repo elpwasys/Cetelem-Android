@@ -22,6 +22,10 @@ public class DocumentoModel extends Model {
     public Boolean obrigatorio;
     public Date dataDigitalizacao;
 
+    public String irregularidadeNome;
+    public String pendenciaObservacao;
+    public String pendenciaJustificativa;
+
     public List<ImagemModel> imagens;
 
     public enum Status {

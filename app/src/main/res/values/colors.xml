@@ -3,6 +3,10 @@
 
     <!-- Red -->
     <color name="red_500">#F44336</color>
+    <color name="red_pending">#A10005</color>
+
+    <!-- Blue -->
+    <color name="blue_800">#1565C0</color>
 
     <!-- Grey -->
     <color name="grey_300">#E0E0E0</color>

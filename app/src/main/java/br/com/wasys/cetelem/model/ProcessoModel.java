@@ -28,6 +28,7 @@ public class ProcessoModel extends Model {
     public enum Status implements AppSpinner.Option {
         RASCUNHO (R.string.processo_status_rascunho, R.drawable.processo_status_rascunho),
         //AGUARDANDO_ANALISE (R.string.status_processo_aguardando_analise, R.drawable.processo_status_aguardando_analise),
+        EM_PROCESSAMENTO (R.string.processo_status_em_processamento, R.drawable.processo_status_em_processamento),
         EM_ANALISE (R.string.processo_status_em_analise, R.drawable.processo_status_em_analise),
         PENDENTE (R.string.processo_status_pendente, R.drawable.processo_status_pendente),
         //EM_ACOMPANHAMENTO (R.string.status_processo_em_acompanhamento, R.drawable.processo_status_em_acompanhamento),

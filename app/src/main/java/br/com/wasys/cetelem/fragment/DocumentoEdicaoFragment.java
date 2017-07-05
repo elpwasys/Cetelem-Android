@@ -13,6 +13,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.todobom.opennotescanner.OpenNoteScannerActivity;
 import com.viewpagerindicator.CirclePageIndicator;
@@ -33,23 +36,33 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import br.com.wasys.cetelem.BuildConfig;
 import br.com.wasys.cetelem.Permission;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ImagePageAdapter;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.model.ImagemModel;
+import br.com.wasys.cetelem.model.ResultModel;
+import br.com.wasys.cetelem.model.UploadModel;
+import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.DocumentoService;
+import br.com.wasys.cetelem.service.ImagemService;
 import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.DateUtils;
 import br.com.wasys.library.utils.FieldUtils;
+import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
 import rx.Subscriber;
+
+import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitalizacaoService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -64,6 +77,8 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     @BindView(R.id.pager) ViewPager mViewPager;
     @BindView(R.id.indicator) CirclePageIndicator mCirclePageIndicator;
+    @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
+    @BindView(R.id.button_delete) FloatingActionButton mDeleteFloatingActionButton;
 
     private Long mId;
     private int mPosition = -1;
@@ -112,7 +127,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        obter();
+        startAsyncObter();
     }
 
     @Override
@@ -122,7 +137,8 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
                 case REQUEST_IMAGE_CAPTURE: {
                     Uri uri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
                     ImagemModel model = ImagemModel.from(uri);
-                    mImagePageAdapter.setModel(model);
+                    mImagePageAdapter.addModel(model);
+                    setVisibilityActions();
                     break;
                 }
             }
@@ -159,7 +175,30 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     @OnClick(R.id.button_salvar)
     public void onSalvarClick() {
+        List<ImagemModel> imagens = mImagePageAdapter.getModels();
+        if (CollectionUtils.isNotEmpty(imagens)) {
+            List<UploadModel> uploads = new ArrayList<>();
+            for (ImagemModel imagem : imagens) {
+                if (imagem.id == null) {
+                    uploads.add(new UploadModel(imagem.path));
+                }
+            }
+            if (CollectionUtils.isNotEmpty(uploads)) {
+                startAsyncSalvar(uploads);
+            }
+        }
+    }
 
+    private boolean hasUpload() {
+        List<ImagemModel> imagens = mImagePageAdapter.getModels();
+        if (CollectionUtils.isNotEmpty(imagens)) {
+            for (ImagemModel imagem : imagens) {
+                if (imagem.id == null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @OnClick(R.id.button_delete)
@@ -171,7 +210,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        excluir();
                     }
                 })
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
@@ -184,7 +223,16 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         dialog.show();
     }
 
-    private void obter() {
+    private void excluir() {
+        ImagemModel model = mImagePageAdapter.getModelAt(mPosition);
+        if (model.id != null) {
+            startAsyncExcluir(model.id);
+        } else {
+            mImagePageAdapter.deleteModelAt(mPosition);
+        }
+    }
+
+    private void startAsyncObter() {
         boolean granted = true;
         Context context = getBaseContext();
         String[] permitions = Permission.merge(Permission.STORAGE, Manifest.permission.CAMERA);
@@ -195,7 +243,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         }
         if (granted) {
             if (mId != null) {
-                obter(mId);
+                startAsyncObter(mId);
             }
         } else {
             FragmentActivity activity = this.getActivity();
@@ -203,7 +251,19 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         }
     }
 
-    private void popular(DocumentoModel documentoModel) {
+    private void setVisibilityActions() {
+        mSalvarFloatingActionButton.setVisibility(View.GONE);
+        boolean has = hasUpload();
+        if (has) {
+            mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
+        }
+        mDeleteFloatingActionButton.setVisibility(View.GONE);
+        if (mImagePageAdapter.getCount() > 0) {
+            mDeleteFloatingActionButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void onAsyncObterCompleted(DocumentoModel documentoModel) {
         mDocumento = documentoModel;
         Context context = getContext();
         FieldUtils.setText(mDataTextView, mDocumento.dataDigitalizacao);
@@ -211,10 +271,11 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         FieldUtils.setText(mVersaoTextView, mDocumento.versaoAtual);
         FieldUtils.setText(mStatusTextView, context.getString(mDocumento.status.stringRes));
         mStatusImagemView.setImageResource(mDocumento.status.drawableRes);
-        if (CollectionUtils.isNotEmpty(documentoModel.imagens)) {
-            mImagePageAdapter.setModels(documentoModel.imagens);
+        if (CollectionUtils.isNotEmpty(mDocumento.imagens)) {
+            mImagePageAdapter.setModels(mDocumento.imagens);
             mCirclePageIndicator.notifyDataSetChanged();
         }
+        setVisibilityActions();
     }
 
     private void openScanner() {
@@ -253,7 +314,21 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         }
     }
 
-    private void obter(Long id) {
+    private void onAsyncExcluirCompleted(ResultModel resultModel) {
+        if (resultModel.success) {
+            mImagePageAdapter.deleteModelAt(mPosition);
+            int count = mImagePageAdapter.getCount();
+            if (count < 1) {
+                mImagePageAdapter = new ImagePageAdapter(getFragmentManager(), null);
+                mViewPager.setAdapter(mImagePageAdapter);
+                mCirclePageIndicator.setViewPager(mViewPager);
+            }
+            Snackbar.make(mDeleteFloatingActionButton, getString(R.string.msg_imagem_excluida_sucesso), Snackbar.LENGTH_LONG).show();
+        }
+        setVisibilityActions();
+    }
+
+    private void startAsyncObter(Long id) {
         showProgress();
         Observable<DocumentoModel> observable = DocumentoService.Async.obter(id);
         prepare(observable).subscribe(new Subscriber<DocumentoModel>() {
@@ -269,9 +344,61 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
             @Override
             public void onNext(DocumentoModel documentoModel) {
                 hideProgress();
-                popular(documentoModel);
+                onAsyncObterCompleted(documentoModel);
             }
         });
+    }
+
+    private void startAsyncExcluir(Long id) {
+        showProgress();
+        Observable<ResultModel> observable = ImagemService.Async.excluir(id);
+        prepare(observable).subscribe(new Subscriber<ResultModel>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(ResultModel resultModel) {
+                hideProgress();
+                onAsyncExcluirCompleted(resultModel);
+            }
+        });
+    }
+
+    private void startAsyncSalvar(List<UploadModel> uploads) {
+        showProgress();
+        String referencia = String.valueOf(mId);
+        Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.criar(referencia, DigitalizacaoModel.Tipo.DOCUMENTO, uploads);
+        prepare(observable).subscribe(new Subscriber<DigitalizacaoModel>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(DigitalizacaoModel model) {
+                hideProgress();
+                onAsyncSalvar(model);
+            }
+        });
+    }
+
+    private void onAsyncSalvar(DigitalizacaoModel model) {
+        if (model != null) {
+            Context context = getContext();
+            startDigitalizacaoService(context, model.tipo, model.referencia);
+            Toast.makeText(getContext(), R.string.msg_documento_enviado_sucesso, Toast.LENGTH_LONG).show();
+            FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
+        }
     }
 
     @Override

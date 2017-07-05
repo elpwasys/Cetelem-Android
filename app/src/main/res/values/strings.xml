@@ -95,5 +95,15 @@
     <string name="msg_processo_reenviado">Processo reenviado com sucesso</string>
     <string name="enviado">Enviado</string>
     <string name="tipificacao">Tipificação</string>
+    <string name="msg_imagem_excluida_sucesso">Imagem excluída com sucesso</string>
+    <string name="msg_documento_enviado_sucesso">Documento enviado com sucesso</string>
+    <string name="processo_status_em_processamento">Em Processamento</string>
+    <string name="tentativas">Tentativas</string>
+    <string name="abrir">Abrir</string>
+    <string name="msg_processo_pendente">Existe uma pendência para este processo!</string>
+    <string name="ver">Ver</string>
+    <string name="justificar">Justificar</string>
+    <string name="justificativa">Justificativa</string>
+    <string name="msg_justificativa_sucesso">Justificativa enviada com sucesso</string>
 
 </resources>

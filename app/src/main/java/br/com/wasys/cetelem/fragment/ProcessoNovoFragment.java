@@ -32,11 +32,11 @@ import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.dialog.DocumentoDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
-import br.com.wasys.cetelem.background.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FragmentUtils;
@@ -49,6 +49,8 @@ import butterknife.OnClick;
 import rx.Observable;
 import rx.Subscriber;
 
+import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitalizacaoService;
+
 /**
  * Created by pascke on 24/06/17.
  */
@@ -59,7 +61,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
     @BindView(R.id.spinner_tipo) AppSpinner mSpinnerTipo;
     @BindView(R.id.layout_spinner) TextInputLayout mSpinnerTextInputLayout;
 
-    private ArrayList<Uri> mUris;
+    private List<Uri> mUris;
     private DataSet<ProcessoModel, ProcessoMeta> mProcessoDataSet;
     private DataSet<TipoProcessoModel, TipoProcessoMeta> mTipoProcessoDataSet;
 
@@ -282,9 +284,14 @@ public class ProcessoNovoFragment extends CetelemFragment {
     }
 
     private void startService(Long id) {
+
         Context context = getContext();
-        DigitalizacaoService.start(context, id);
-        Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
+        String referencia = String.valueOf(id);
+
+        DigitalizacaoModel.Tipo tipo = DigitalizacaoModel.Tipo.TIPIFICACAO;
+        startDigitalizacaoService(getContext(), tipo, referencia);
+        Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_LONG).show();
+
         String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
         FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
         ProcessoEdicaoFragment fragment = ProcessoEdicaoFragment.newInstance(id);

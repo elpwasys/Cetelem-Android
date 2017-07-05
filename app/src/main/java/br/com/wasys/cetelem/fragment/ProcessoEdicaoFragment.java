@@ -3,6 +3,7 @@ package br.com.wasys.cetelem.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -10,17 +11,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.dialog.DigitalizacaoErrorDialog;
+import br.com.wasys.cetelem.dialog.DigitalizacaoDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
@@ -36,19 +38,27 @@ import butterknife.OnClick;
 import rx.Observable;
 import rx.Subscriber;
 
+import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitalizacaoService;
+
 /**
  * Created by pascke on 24/06/17.
  */
 
 public class ProcessoEdicaoFragment extends CetelemFragment {
 
-    @BindView(R.id.text_tipo) TextView mTipoTextView;
-    @BindView(R.id.button_error) Button mErrorButton;
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
+    @BindView(R.id.text_view_id) TextView mIdTextView;
+    @BindView(R.id.text_view_status) TextView mStatusTextView;
+    @BindView(R.id.text_view_data) TextView mDataTextView;
+    @BindView(R.id.text_view_tipo_processo) TextView mTipoTextView;
+
+    @BindView(R.id.image_view_status) ImageView mStatusImageView;
 
     private Long mId;
     private ProcessoModel mProcesso;
-    private DigitalizacaoModel mDigitalizacaoModel;
+    private DigitalizacaoModel mDigitalizacao;
+
+    private Snackbar mSnackbar;
 
     private static final String KEY_ID = ProcessoEdicaoFragment.class.getName() + ".id";
 
@@ -96,10 +106,17 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_collection:
-                abrirDocumentos();
+                openDocumentoList();
                 return true;
         }
         return false;
+    }
+
+    @OnClick(R.id.button_info)
+    public void onInfoClick() {
+        if (mId != null) {
+            startAsyncDigitalizacaoBy(mId);
+        }
     }
 
     @OnClick(R.id.button_salvar)
@@ -107,36 +124,22 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         startAsyncSalvar();
     }
 
-    @OnClick(R.id.button_error)
-    public void onErrorClick() {
-        DigitalizacaoErrorDialog dialog = DigitalizacaoErrorDialog.newInstance(mId, DigitalizacaoModel.Tipo.TIPIFICACAO, new DigitalizacaoErrorDialog.OnUplodErrorListener() {
-            @Override
-            public void onReenviar(boolean answer) {
-                if (answer) {
-                    reenviar();
-                }
-            }
-        });
-        FragmentManager fragmentManager = getFragmentManager();
-        dialog.show(fragmentManager, dialog.getClass().getSimpleName());
-    }
-
     private void iniciar() {
         if (mId != null) {
             startAsyncEdicaoById(mId);
-            startAsyncDigitalizacaoBy(mId);
         }
     }
 
-    private void abrirDocumentos() {
+    private void openDocumentoList() {
         DocumentoListaFragment fragment = DocumentoListaFragment.newInstance(mId);
         FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
     }
 
     private void reenviar() {
-        br.com.wasys.cetelem.background.DigitalizacaoService.start(getContext(), mId);
-        mErrorButton.setVisibility(View.GONE);
-        Toast.makeText(getContext(), R.string.msg_processo_reenviado, Toast.LENGTH_SHORT).show();
+        String referencia = String.valueOf(mId);
+        DigitalizacaoModel.Tipo tipo = DigitalizacaoModel.Tipo.TIPIFICACAO;
+        startDigitalizacaoService(getContext(), tipo, referencia);
+        Toast.makeText(getContext(), R.string.msg_processo_reenviado, Toast.LENGTH_LONG).show();
     }
 
     private boolean validate() {
@@ -169,9 +172,17 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     }
 
     private void onAsyncEdicaoCompleted(ProcessoModel model) {
+
         mProcesso = model;
+
         TipoProcessoModel tipoProcesso = mProcesso.tipoProcesso;
+        FieldUtils.setText(mIdTextView, mProcesso.id);
         FieldUtils.setText(mTipoTextView, tipoProcesso.nome);
+        FieldUtils.setText(mDataTextView, mProcesso.dataCriacao);
+        FieldUtils.setText(mStatusTextView, getString(mProcesso.status.stringRes));
+
+        mStatusImageView.setImageResource(mProcesso.status.drawableRes);
+
         if (CollectionUtils.isNotEmpty(mProcesso.gruposCampos)) {
             Context context = getContext();
             for (CampoGrupoModel grupo : mProcesso.gruposCampos) {
@@ -181,17 +192,50 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
                 mLayoutFields.addView(campoGrupoLayout);
             }
         }
+
+        if (!ProcessoModel.Status.PENDENTE.equals(mProcesso.status)) {
+            startAsyncCheckErrorById(mId);
+        } else {
+            String text = getString(R.string.msg_processo_pendente);
+            Snackbar snackbar = makeSnackbar(text, Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction(R.string.ver, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openDocumentoList();
+                }
+            });
+            snackbar.show();
+        }
+    }
+
+    private void onAsyncCheckErrorCompleted(Boolean exists) {
+        if (BooleanUtils.isTrue(exists)) {
+            String text = getString(R.string.msg_erro_digitalizacao);
+            Snackbar snackbar = makeSnackbar(text, Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction(R.string.abrir, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startAsyncDigitalizacaoBy(mId);
+                }
+            });
+            snackbar.show();
+        }
     }
 
     private void onAsyncDigitalizacaoCompleted(DigitalizacaoModel model) {
-        mDigitalizacaoModel = model;
-        int visibility = View.GONE;
-        if (model != null) {
-            if (DigitalizacaoModel.Status.ERRO.equals(mDigitalizacaoModel.status)) {
-                visibility = View.VISIBLE;
-            }
+        mDigitalizacao = model;
+        if (mDigitalizacao != null) {
+            DigitalizacaoDialog dialog = DigitalizacaoDialog.newInstance(mDigitalizacao, new DigitalizacaoDialog.OnUplodErrorListener() {
+                @Override
+                public void onReenviar(boolean answer) {
+                    if (answer) {
+                        reenviar();
+                    }
+                }
+            });
+            FragmentManager fragmentManager = getFragmentManager();
+            dialog.show(fragmentManager, dialog.getClass().getSimpleName());
         }
-        mErrorButton.setVisibility(visibility);
     }
 
     /**
@@ -221,8 +265,8 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     }
 
     private void startAsyncDigitalizacaoBy(Long id) {
-        String reference = String.valueOf(id);
-        Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.getBy(reference, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ERRO);
+        String referencia = String.valueOf(id);
+        Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.getBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO);
         prepare(observable).subscribe(new Subscriber<DigitalizacaoModel>() {
             @Override
             public void onCompleted() {
@@ -234,6 +278,25 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
             @Override
             public void onNext(DigitalizacaoModel model) {
                 onAsyncDigitalizacaoCompleted(model);
+            }
+        });
+    }
+
+
+    private void startAsyncCheckErrorById(Long id) {
+        String referencia = String.valueOf(id);
+        Observable<Boolean> observable = DigitalizacaoService.Async.existsBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ERRO);
+        prepare(observable).subscribe(new Subscriber<Boolean>() {
+            @Override
+            public void onCompleted() {
+            }
+            @Override
+            public void onError(Throwable e) {
+                handle(e);
+            }
+            @Override
+            public void onNext(Boolean exists) {
+                onAsyncCheckErrorCompleted(exists);
             }
         });
     }

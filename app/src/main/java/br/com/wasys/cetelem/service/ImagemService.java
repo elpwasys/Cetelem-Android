@@ -1,11 +1,8 @@
 package br.com.wasys.cetelem.service;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,9 +11,10 @@ import java.util.Map;
 
 import br.com.wasys.cetelem.Application;
 import br.com.wasys.cetelem.BuildConfig;
+import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.endpoint.ImagemEndpoint;
 import br.com.wasys.cetelem.model.ImagemModel;
-import br.com.wasys.library.http.Endpoint;
+import br.com.wasys.cetelem.model.ResultModel;
 import br.com.wasys.library.service.Service;
 import br.com.wasys.library.utils.AndroidUtils;
 import br.com.wasys.library.utils.FileUtils;
@@ -30,7 +28,7 @@ import rx.Subscriber;
  */
 public class ImagemService extends Service {
 
-    private static final String TAG = "I";
+    private static final String TAG = "Imagem";
 
     public static Uri getViewerUri(String path) {
         Uri uri = null;
@@ -65,11 +63,11 @@ public class ImagemService extends Service {
         model.path = file.getAbsolutePath();
         model.cache = true;
         if (!file.exists()) {
-            Map<String, String> headers = br.com.wasys.cetelem.endpoint.Endpoint.getHeaders();
+            Map<String, String> headers = Endpoint.getHeaders();
             String baseURL = BuildConfig.SERVER_URL + dirs + "/";
-            ImagemEndpoint endpoint = Endpoint.create(ImagemEndpoint.class, baseURL, headers);
+            ImagemEndpoint endpoint = br.com.wasys.library.http.Endpoint.create(ImagemEndpoint.class, baseURL, headers);
             Call<ResponseBody> call = endpoint.carregar(fileName);
-            ResponseBody responseBody = Endpoint.execute(call);
+            ResponseBody responseBody = br.com.wasys.library.http.Endpoint.execute(call);
             byte[] bytes = responseBody.bytes();
             File parentFile = file.getParentFile();
             if (!parentFile.exists()) {
@@ -84,7 +82,28 @@ public class ImagemService extends Service {
         return model;
     }
 
+    public static ResultModel excluir(Long id) throws Throwable {
+        ImagemEndpoint endpoint = Endpoint.create(ImagemEndpoint.class);
+        Call<ResultModel> call = endpoint.excluir(id);
+        ResultModel model = Endpoint.execute(call);
+        return model;
+    }
+
     public static class Async {
+        public static Observable<ResultModel> excluir(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<ResultModel>() {
+                @Override
+                public void call(Subscriber<? super ResultModel> subscriber) {
+                    try {
+                        ResultModel model = ImagemService.excluir(id);
+                        subscriber.onNext(model);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
         public static Observable<ImagemModel> carregar(final String caminho) {
             return Observable.create(new Observable.OnSubscribe<ImagemModel>() {
                 @Override

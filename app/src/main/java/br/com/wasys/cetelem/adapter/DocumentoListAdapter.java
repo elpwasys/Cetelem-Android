@@ -6,10 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -21,11 +24,12 @@ import br.com.wasys.library.utils.FieldUtils;
  * Created by pascke on 03/07/17.
  */
 
-public class DocumentoListAdapter extends BaseExpandableListAdapter {
+public class DocumentoListAdapter extends BaseExpandableListAdapter implements View.OnClickListener {
 
     private Context mContext;
     private List<Group> mGroups;
     private LayoutInflater mInflater;
+    private DocumentoListAdapterListener mDocumentoListAdapterListener;
 
     public DocumentoListAdapter(Context context, List<Group> groups) {
         this.mGroups = groups;
@@ -112,6 +116,12 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter {
             holder.statusTextView = (TextView) convertView.findViewById(R.id.text_view_status);
             holder.versaoTextView = (TextView) convertView.findViewById(R.id.text_view_versao);
             holder.statusImagemView = (ImageView) convertView.findViewById(R.id.image_view_status);
+            // PENDENCIA
+            holder.pendenciaLayout = (LinearLayout) convertView.findViewById(R.id.layout_pendencia);
+            holder.observacaoTextView = (TextView) convertView.findViewById(R.id.text_observacao);
+            holder.irregularidadeTextView = (TextView) convertView.findViewById(R.id.text_irregularidade);
+            holder.justificarButton = (ImageButton) convertView.findViewById(R.id.buttom_justificar);
+            holder.justificarButton.setOnClickListener(this);
             convertView.setTag(holder);
         }
         Group group = mGroups.get(groupPosition);
@@ -121,12 +131,35 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter {
         FieldUtils.setText(holder.statusTextView, mContext.getString(documento.status.stringRes));
         FieldUtils.setText(holder.versaoTextView, mContext.getString(R.string.documento_versao, documento.versaoAtual));
         holder.statusImagemView.setImageResource(documento.status.drawableRes);
+        // PENDENCIA
+        holder.justificarButton.setTag(documento);
+        holder.pendenciaLayout.setVisibility(View.GONE);
+        if (DocumentoModel.Status.PENDENTE.equals(documento.status)) {
+            holder.pendenciaLayout.setVisibility(View.VISIBLE);
+            FieldUtils.setText(holder.observacaoTextView, documento.pendenciaObservacao);
+            FieldUtils.setText(holder.irregularidadeTextView, documento.irregularidadeNome);
+        }
         return convertView;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view instanceof ImageButton) {
+            ImageButton button = (ImageButton) view;
+            DocumentoModel documento = (DocumentoModel) button.getTag();
+            if (mDocumentoListAdapterListener != null) {
+                mDocumentoListAdapterListener.onReplayClick(documento);
+            }
+        }
+    }
+
+    public void setDocumentoListAdapterListener(DocumentoListAdapterListener documentoListAdapterListener) {
+        mDocumentoListAdapterListener = documentoListAdapterListener;
     }
 
     public static class Group {
@@ -155,5 +188,14 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter {
         public TextView statusTextView;
         public TextView versaoTextView;
         public ImageView statusImagemView;
+        // PENDENCIA
+        public LinearLayout pendenciaLayout;
+        public TextView observacaoTextView;
+        public TextView irregularidadeTextView;
+        public ImageButton justificarButton;
+    }
+
+    public static interface DocumentoListAdapterListener {
+        void onReplayClick(DocumentoModel documento);
     }
 }
