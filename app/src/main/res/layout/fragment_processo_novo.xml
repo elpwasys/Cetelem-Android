@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <br.com.wasys.library.widget.AppSpinner
-                android:id="@+id/spinner_tipo_processo"
+                android:id="@+id/spinner_tipo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/tipo_processo"

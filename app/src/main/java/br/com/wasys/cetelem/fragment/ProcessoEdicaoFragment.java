@@ -16,17 +16,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.dialog.UplodErrorDialog;
+import br.com.wasys.cetelem.dialog.DigitalizacaoErrorDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
-import br.com.wasys.cetelem.model.ErrorModel;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
-import br.com.wasys.cetelem.service.ErrorService;
+import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FieldUtils;
@@ -43,12 +42,13 @@ import rx.Subscriber;
 
 public class ProcessoEdicaoFragment extends CetelemFragment {
 
+    @BindView(R.id.text_tipo) TextView mTipoTextView;
     @BindView(R.id.button_error) Button mErrorButton;
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
-    @BindView(R.id.text_tipo_processo) TextView mTipoProcessoTextView;
 
     private Long mId;
     private ProcessoModel mProcesso;
+    private DigitalizacaoModel mDigitalizacaoModel;
 
     private static final String KEY_ID = ProcessoEdicaoFragment.class.getName() + ".id";
 
@@ -76,7 +76,6 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_processo_edicao, container, false);
-        setTitle(R.string.titulo_processo);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -84,10 +83,7 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (mId != null) {
-            editar(mId);
-            findErrors(mId);
-        }
+        iniciar();
     }
 
     @Override
@@ -100,25 +96,20 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         int itemId = item.getItemId();
         switch (itemId) {
             case R.id.action_collection:
-                onAbrirDocumentos();
+                abrirDocumentos();
                 return true;
         }
         return false;
     }
 
-    private void onAbrirDocumentos() {
-        DocumentoListaFragment fragment = DocumentoListaFragment.newInstance(mId);
-        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
-    }
-
     @OnClick(R.id.button_salvar)
     public void onSalvarClick() {
-        salvar();
+        startAsyncSalvar();
     }
 
     @OnClick(R.id.button_error)
     public void onErrorClick() {
-        UplodErrorDialog dialog = UplodErrorDialog.newInstance(mId, ErrorModel.Generator.PROCESSO, new UplodErrorDialog.OnUplodErrorListener() {
+        DigitalizacaoErrorDialog dialog = DigitalizacaoErrorDialog.newInstance(mId, DigitalizacaoModel.Tipo.TIPIFICACAO, new DigitalizacaoErrorDialog.OnUplodErrorListener() {
             @Override
             public void onReenviar(boolean answer) {
                 if (answer) {
@@ -130,10 +121,57 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         dialog.show(fragmentManager, dialog.getClass().getSimpleName());
     }
 
-    private void popular(ProcessoModel processoModel) {
-        mProcesso = processoModel;
+    private void iniciar() {
+        if (mId != null) {
+            startAsyncEdicaoById(mId);
+            startAsyncDigitalizacaoBy(mId);
+        }
+    }
+
+    private void abrirDocumentos() {
+        DocumentoListaFragment fragment = DocumentoListaFragment.newInstance(mId);
+        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
+    }
+
+    private void reenviar() {
+        br.com.wasys.cetelem.background.DigitalizacaoService.start(getContext(), mId);
+        mErrorButton.setVisibility(View.GONE);
+        Toast.makeText(getContext(), R.string.msg_processo_reenviado, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean validate() {
+        boolean valid = true;
+        int childCount = mLayoutFields.getChildCount();
+        if (childCount > 0) {
+            for (int i = 0; i < childCount; i++) {
+                View view = mLayoutFields.getChildAt(i);
+                if (view instanceof AppGroupInputLayout) {
+                    AppGroupInputLayout grupoLayout = (AppGroupInputLayout) view;
+                    if (!grupoLayout.isValid()) {
+                        valid = false;
+                    }
+                }
+            }
+            if (!valid) {
+                Toast.makeText(getContext(), R.string.msg_form_invalido, Toast.LENGTH_SHORT).show();
+            }
+        }
+        return valid;
+    }
+
+    /**
+     *
+     * COMPLETED METHODS ASYNCHRONOUS HANDLERS
+     *
+     */
+    private void onAsyncSalvarCompleted() {
+        Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
+    }
+
+    private void onAsyncEdicaoCompleted(ProcessoModel model) {
+        mProcesso = model;
         TipoProcessoModel tipoProcesso = mProcesso.tipoProcesso;
-        FieldUtils.setText(mTipoProcessoTextView, tipoProcesso.nome);
+        FieldUtils.setText(mTipoTextView, tipoProcesso.nome);
         if (CollectionUtils.isNotEmpty(mProcesso.gruposCampos)) {
             Context context = getContext();
             for (CampoGrupoModel grupo : mProcesso.gruposCampos) {
@@ -145,7 +183,23 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
         }
     }
 
-    private void editar(Long id) {
+    private void onAsyncDigitalizacaoCompleted(DigitalizacaoModel model) {
+        mDigitalizacaoModel = model;
+        int visibility = View.GONE;
+        if (model != null) {
+            if (DigitalizacaoModel.Status.ERRO.equals(mDigitalizacaoModel.status)) {
+                visibility = View.VISIBLE;
+            }
+        }
+        mErrorButton.setVisibility(visibility);
+    }
+
+    /**
+     *
+     * ASYNCHRONOUS METHODS
+     *
+     */
+    private void startAsyncEdicaoById(Long id) {
         showProgress();
         Observable<ProcessoModel> observable = ProcessoService.Async.editar(id);
         prepare(observable).subscribe(new Subscriber<ProcessoModel>() {
@@ -161,19 +215,15 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
             @Override
             public void onNext(ProcessoModel processoModel) {
                 hideProgress();
-                popular(processoModel);
+                onAsyncEdicaoCompleted(processoModel);
             }
         });
     }
 
-    private void reenviar() {
-
-    }
-
-    private void findErrors(Long id) {
+    private void startAsyncDigitalizacaoBy(Long id) {
         String reference = String.valueOf(id);
-        Observable<Boolean> observable = ErrorService.Async.contains(reference, ErrorModel.Action.UPLOAD, ErrorModel.Generator.PROCESSO);
-        prepare(observable).subscribe(new Subscriber<Boolean>() {
+        Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.getBy(reference, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ERRO);
+        prepare(observable).subscribe(new Subscriber<DigitalizacaoModel>() {
             @Override
             public void onCompleted() {
             }
@@ -182,21 +232,13 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
                 handle(e);
             }
             @Override
-            public void onNext(Boolean contains) {
-                handleErrors(contains);
+            public void onNext(DigitalizacaoModel model) {
+                onAsyncDigitalizacaoCompleted(model);
             }
         });
     }
 
-    private void handleErrors(Boolean contains) {
-        int visibility = View.GONE;
-        if (BooleanUtils.isTrue(contains)) {
-            visibility = View.VISIBLE;
-        }
-        mErrorButton.setVisibility(visibility);
-    }
-
-    private void salvar() {
+    private void startAsyncSalvar() {
         boolean valid = validate();
         if (valid) {
             int childCount = mLayoutFields.getChildCount();
@@ -227,29 +269,9 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
                 @Override
                 public void onNext(ProcessoModel processoModel) {
                     hideProgress();
-                    Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
+                    onAsyncSalvarCompleted();
                 }
             });
         }
-    }
-
-    private boolean validate() {
-        boolean valid = true;
-        int childCount = mLayoutFields.getChildCount();
-        if (childCount > 0) {
-            for (int i = 0; i < childCount; i++) {
-                View view = mLayoutFields.getChildAt(i);
-                if (view instanceof AppGroupInputLayout) {
-                    AppGroupInputLayout grupoLayout = (AppGroupInputLayout) view;
-                    if (!grupoLayout.isValid()) {
-                        valid = false;
-                    }
-                }
-            }
-            if (!valid) {
-                Toast.makeText(getContext(), R.string.msg_form_invalido, Toast.LENGTH_SHORT).show();
-            }
-        }
-        return valid;
     }
 }

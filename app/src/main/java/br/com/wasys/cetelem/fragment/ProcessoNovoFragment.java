@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.activity.DocumentScanActivity;
+import br.com.wasys.cetelem.activity.DocumentScannerActivity;
 import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
@@ -36,7 +36,7 @@ import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoDocumentoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
-import br.com.wasys.cetelem.service.DigitalizacaoService;
+import br.com.wasys.cetelem.background.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
 import br.com.wasys.library.utils.FragmentUtils;
@@ -56,7 +56,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
 
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
     @BindView(R.id.button_salvar) FloatingActionButton mButtonSalvar;
-    @BindView(R.id.spinner_tipo_processo) AppSpinner mSpinnerTipoProcesso;
+    @BindView(R.id.spinner_tipo) AppSpinner mSpinnerTipo;
     @BindView(R.id.layout_spinner) TextInputLayout mSpinnerTextInputLayout;
 
     private ArrayList<Uri> mUris;
@@ -82,7 +82,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mSpinnerTipoProcesso.setOnOptionClickListener(new AppSpinner.OnOptionClickListener() {
+        mSpinnerTipo.setOnOptionClickListener(new AppSpinner.OnOptionClickListener() {
             @Override
             public void onOptionClick(String value) {
                 mSpinnerTextInputLayout.setError(null);
@@ -139,7 +139,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
         if (mTipoProcessoDataSet != null) {
             documentos = mTipoProcessoDataSet.meta.tiposDocumentos;
         }
-        Intent intent = DocumentScanActivity.newIntent(context, new ArrayList<>(mUris), documentos);
+        Intent intent = DocumentScannerActivity.newIntent(context, new ArrayList<>(mUris), documentos);
         startActivityForResult(intent, REQUEST_SCAN);
     }
 
@@ -173,7 +173,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
         if (mProcessoDataSet != null) {
             ProcessoMeta meta = mProcessoDataSet.meta;
             ProcessoModel model = dataSet.data;
-            mSpinnerTipoProcesso.setOptions(meta.tiposProcessos);
+            mSpinnerTipo.setOptions(meta.tiposProcessos);
             if (model != null) {
                 TipoProcessoMeta tipoProcessoMeta = new TipoProcessoMeta();
                 DataSet<TipoProcessoModel, TipoProcessoMeta> tipoProcessoDataSet = new DataSet<>();
@@ -181,12 +181,12 @@ public class ProcessoNovoFragment extends CetelemFragment {
                 tipoProcessoDataSet.data = model.tipoProcesso;
                 tipoProcessoDataSet.meta = tipoProcessoMeta;
                 onTipoDataSetLoaded(tipoProcessoDataSet);
-                mSpinnerTipoProcesso.setValue(model.tipoProcesso.getValue());
+                mSpinnerTipo.setValue(model.tipoProcesso.getValue());
             }
         }
         int childCount = mLayoutFields.getChildCount();
         if (childCount == 0) {
-            mSpinnerTipoProcesso.showDropDown();
+            mSpinnerTipo.showDropDown();
         }
     }
 
@@ -236,7 +236,7 @@ public class ProcessoNovoFragment extends CetelemFragment {
     private void salvar() {
         boolean valid = validate();
         if (valid) {
-            Long tipoProcessoId = TypeUtils.parse(Long.class, mSpinnerTipoProcesso.getValue());
+            Long tipoProcessoId = TypeUtils.parse(Long.class, mSpinnerTipo.getValue());
             ProcessoModel processoModel = new ProcessoModel();
             processoModel.tipoProcesso = new TipoProcessoModel(tipoProcessoId);
             int childCount = mLayoutFields.getChildCount();
@@ -284,17 +284,16 @@ public class ProcessoNovoFragment extends CetelemFragment {
     private void startService(Long id) {
         Context context = getContext();
         DigitalizacaoService.start(context, id);
-
         Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
         String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
         FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
-        ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();
+        ProcessoEdicaoFragment fragment = ProcessoEdicaoFragment.newInstance(id);
         FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
     }
 
     private boolean validate() {
         boolean valid = true;
-        Long tipoProcessoId = TypeUtils.parse(Long.class, mSpinnerTipoProcesso.getValue());
+        Long tipoProcessoId = TypeUtils.parse(Long.class, mSpinnerTipo.getValue());
         if (tipoProcessoId == null) {
             valid = false;
             mSpinnerTextInputLayout.setErrorEnabled(true);

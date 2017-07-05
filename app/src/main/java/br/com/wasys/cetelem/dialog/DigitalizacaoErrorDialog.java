@@ -14,18 +14,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.model.ErrorModel;
-import br.com.wasys.cetelem.model.FiltroModel;
-import br.com.wasys.cetelem.service.ErrorService;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
+import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.library.utils.DateUtils;
 import br.com.wasys.library.utils.FieldUtils;
-import br.com.wasys.library.utils.TypeUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -36,27 +31,27 @@ import rx.android.schedulers.AndroidSchedulers;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class UplodErrorDialog extends AppCompatDialogFragment {
+public class DigitalizacaoErrorDialog extends AppCompatDialogFragment {
 
     @BindView(R.id.text_data) TextView mDataTextView;
     @BindView(R.id.text_mensagem) TextView mMensagemTextView;
     @BindView(R.id.text_generator) TextView mGeneratorTextView;
     @BindView(R.id.text_reference) TextView mReferenceTextView;
 
-    private ErrorModel mError;
     private String mReference;
-    private ErrorModel.Generator mGenerator;
+    private DigitalizacaoModel.Tipo mTipo;
+    private DigitalizacaoModel mDigitalizacao;
     private OnUplodErrorListener mOnUplodErrorListener;
 
     private Looper mLooper;
     private HandlerThread mHandlerThread;
 
-    private static final String KEY_REFERENCE = UplodErrorDialog.class.getName() + ".reference";
-    private static final String KEY_GENERATOR = UplodErrorDialog.class.getName() + ".generator";
+    private static final String KEY_REFERENCE = DigitalizacaoErrorDialog.class.getName() + ".reference";
+    private static final String KEY_GENERATOR = DigitalizacaoErrorDialog.class.getName() + ".generator";
 
-    public static UplodErrorDialog newInstance(Long id, ErrorModel.Generator generator, OnUplodErrorListener onUplodErrorListener) {
-        UplodErrorDialog fragment = new UplodErrorDialog();
-        fragment.mGenerator = generator;
+    public static DigitalizacaoErrorDialog newInstance(Long id, DigitalizacaoModel.Tipo tipo, OnUplodErrorListener onUplodErrorListener) {
+        DigitalizacaoErrorDialog fragment = new DigitalizacaoErrorDialog();
+        fragment.mTipo = tipo;
         fragment.mReference = String.valueOf(id);
         fragment.mOnUplodErrorListener = onUplodErrorListener;
         return fragment;
@@ -66,12 +61,12 @@ public class UplodErrorDialog extends AppCompatDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         FragmentActivity activity = getActivity();
         LayoutInflater inflater = LayoutInflater.from(activity);
-        View view = inflater.inflate(R.layout.dialog_uplod_error, null);
+        View view = inflater.inflate(R.layout.dialog_digitalizacao_error, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setView(view);
         ButterKnife.bind(this, view);
         AlertDialog dialog = builder.create();
-        iniciar();
+        startAsyncDigitalizacao();
         return dialog;
     }
 
@@ -87,13 +82,13 @@ public class UplodErrorDialog extends AppCompatDialogFragment {
         return mLooper;
     }
 
-    private void popular(ErrorModel model) {
-        mError = model;
-        if (mError != null) {
-            FieldUtils.setText(mDataTextView, mError.date, DateUtils.DateType.DATE_TIME_BR);
-            FieldUtils.setText(mMensagemTextView, mError.message);
-            FieldUtils.setText(mReferenceTextView, mError.reference);
-            FieldUtils.setText(mGeneratorTextView, getString(mError.generator.stringRes));
+    private void onAsyncDigitalizacao(DigitalizacaoModel model) {
+        mDigitalizacao = model;
+        if (mDigitalizacao != null) {
+            FieldUtils.setText(mDataTextView, mDigitalizacao.dataHoraRetorno, DateUtils.DateType.DATE_TIME_BR);
+            FieldUtils.setText(mMensagemTextView, mDigitalizacao.mensagem);
+            FieldUtils.setText(mReferenceTextView, mDigitalizacao.referencia);
+            FieldUtils.setText(mGeneratorTextView, getString(mDigitalizacao.tipo.stringRes));
         }
     }
 
@@ -112,14 +107,14 @@ public class UplodErrorDialog extends AppCompatDialogFragment {
         }
     }
 
-    private void iniciar() {
-        Bundle bundle = getArguments();
-        if (StringUtils.isNotBlank(mReference) && mGenerator != null) {
-            Observable<List<ErrorModel>> observable = ErrorService.Async.find(mReference, ErrorModel.Action.UPLOAD, mGenerator);
+    private void startAsyncDigitalizacao() {
+
+        if (StringUtils.isNotBlank(mReference) && mTipo != null) {
+            Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.getBy(mReference, mTipo, DigitalizacaoModel.Status.ERRO);
             observable
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(AndroidSchedulers.from(getLooper()))
-                    .subscribe(new Subscriber<List<ErrorModel>>() {
+                    .subscribe(new Subscriber<DigitalizacaoModel>() {
                         public void onCompleted() {
 
                         }
@@ -128,13 +123,8 @@ public class UplodErrorDialog extends AppCompatDialogFragment {
 
                         }
                         @Override
-                        public void onNext(List<ErrorModel> errorList) {
-                            int size = CollectionUtils.size(errorList);
-                            if (size > 0) {
-                                int index = size - 1;
-                                ErrorModel errorModel = errorList.get(index);
-                                popular(errorModel);
-                            }
+                        public void onNext(DigitalizacaoModel model) {
+                            onAsyncDigitalizacao(model);
                         }
                     });
         }

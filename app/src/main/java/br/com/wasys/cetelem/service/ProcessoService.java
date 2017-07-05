@@ -2,6 +2,7 @@ package br.com.wasys.cetelem.service;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 
 import br.com.wasys.cetelem.dataset.DataSet;
@@ -9,12 +10,12 @@ import br.com.wasys.cetelem.dataset.meta.ProcessoMeta;
 import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.endpoint.Endpoint;
 import br.com.wasys.cetelem.endpoint.ProcessoEndpoint;
-import br.com.wasys.cetelem.model.PesquisaModel;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
-import br.com.wasys.cetelem.paging.ProcessoPagingModel;
-import br.com.wasys.cetelem.realm.Upload;
+import br.com.wasys.cetelem.realm.Arquivo;
+import br.com.wasys.cetelem.realm.Digitalizacao;
 import br.com.wasys.library.service.Service;
 import io.realm.Realm;
 import retrofit2.Call;
@@ -26,6 +27,7 @@ import rx.Subscriber;
  */
 public class ProcessoService extends Service {
 
+
     public static ProcessoModel salvar(ProcessoModel processoModel) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
         Call<ProcessoModel> call = endpoint.salvar(processoModel);
@@ -33,21 +35,40 @@ public class ProcessoService extends Service {
         List<UploadModel> models = processoModel.uploads;
         if (CollectionUtils.isNotEmpty(models)) {
             Realm realm = Realm.getDefaultInstance();
-            String reference = String.valueOf(result.id);
+            String referencia = String.valueOf(result.id);
             try {
                 realm.beginTransaction();
+                // REGISTRO DE DIGITALIZACAO
+                Digitalizacao digitalizacao = realm.where(Digitalizacao.class)
+                        .equalTo("tipo", DigitalizacaoModel.Tipo.TIPIFICACAO.name())
+                        .equalTo("referencia", referencia)
+                        .findFirst();
+                if (digitalizacao == null) {
+                    Long id = RealmService.getNextId(Digitalizacao.class);
+                    digitalizacao = realm.createObject(Digitalizacao.class, id);
+                    digitalizacao.tentativas = 0;
+                }
+                Date date = new Date();
+                digitalizacao.tipo = DigitalizacaoModel.Tipo.TIPIFICACAO.name();
+                digitalizacao.status = DigitalizacaoModel.Status.AGUARDANDO.name();
+                digitalizacao.mensagem = null;
+                digitalizacao.referencia = referencia;
+                digitalizacao.dataHora = date;
+                digitalizacao.dataHoraEnvio = null;
+                digitalizacao.dataHoraRetorno = null;
+                // REGISTROS DE ARQUIVO DA DIGITALIZACAO
                 for (UploadModel model : models) {
                     String path = model.path;
-                    Upload upload = realm.where(Upload.class)
-                            .equalTo("path", path)
+                    Arquivo arquivo = realm.where(Arquivo.class)
+                            .equalTo("caminho", path)
                             .findFirst();
-                    if (upload == null) {
-                        upload = realm.createObject(Upload.class, path);
+                    if (arquivo == null) {
+                        Long id = RealmService.getNextId(Arquivo.class);
+                        arquivo = realm.createObject(Arquivo.class, id);
+                        arquivo.caminho = path;
+                        arquivo.digitalizacao = digitalizacao;
+                        digitalizacao.arquivos.add(arquivo);
                     }
-                    model.status = UploadModel.Status.WAITING;
-                    model.sender = UploadModel.Sender.PROCESSO;
-                    model.reference = reference;
-                    upload.copy(model);
                 }
                 realm.commitTransaction();
             } catch (Throwable e) {

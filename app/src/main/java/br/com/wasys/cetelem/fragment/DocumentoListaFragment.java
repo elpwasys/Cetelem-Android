@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.wasys.cetelem.R;
-import br.com.wasys.cetelem.activity.DocumentScanActivity;
+import br.com.wasys.cetelem.activity.DocumentScannerActivity;
 import br.com.wasys.cetelem.adapter.DocumentoListAdapter;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.service.DocumentoService;
@@ -73,7 +73,6 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_documento_lista, container, false);
-        setTitle(R.string.titulo_documentos);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -139,7 +138,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     // ABRE O SCANNER
     private void openScanner() {
         Context context = getContext();
-        Intent intent = DocumentScanActivity.newIntent(context, new ArrayList<>(mUris), null);
+        Intent intent = DocumentScannerActivity.newIntent(context, new ArrayList<>(mUris), null);
         startActivityForResult(intent, REQUEST_SCAN);
     }
 

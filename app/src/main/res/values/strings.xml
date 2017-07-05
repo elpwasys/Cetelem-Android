@@ -3,7 +3,6 @@
     <string name="title_activity_main">@string/app_name</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_settings">Configurações</string>
     <string name="user_login">Login do usuário</string>
     <string name="email">E-mail</string>
     <string name="password">Senha</string>
@@ -93,5 +92,8 @@
     <string name="mensagem">Mensagem</string>
     <string name="documento">Documento</string>
     <string name="reenviar">Reenviar</string>
+    <string name="msg_processo_reenviado">Processo reenviado com sucesso</string>
+    <string name="enviado">Enviado</string>
+    <string name="tipificacao">Tipificação</string>
 
 </resources>

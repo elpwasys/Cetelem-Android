@@ -11,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import br.com.wasys.cetelem.Dispositivo;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.Usuario;
+import br.com.wasys.cetelem.fragment.HomeFragment;
 import br.com.wasys.cetelem.fragment.ProcessoNovoFragment;
 import br.com.wasys.cetelem.fragment.ProcessoPesquisaFragment;
 import br.com.wasys.library.utils.FieldUtils;
@@ -62,6 +62,9 @@ public class MainActivity extends CetelemActivity
         }
 
         //drawer.openDrawer(GravityCompat.START);
+
+        HomeFragment fragment = HomeFragment.newInstance();
+        FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
     }
 
     @Override
@@ -80,7 +83,7 @@ public class MainActivity extends CetelemActivity
         }
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         // getMenuInflater().inflate(R.menu.main, menu);
@@ -100,24 +103,22 @@ public class MainActivity extends CetelemActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         if (id == R.id.nav_plus) {
             FragmentUtils.popAllBackStackImmediate(this);
-            String backStackName = ProcessoNovoFragment.class.getSimpleName();
             ProcessoNovoFragment fragment = ProcessoNovoFragment.newInstance();
-            FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
+            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
         } else if (id == R.id.nav_search) {
             FragmentUtils.popAllBackStackImmediate(this);
-            String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
             ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();
-            FragmentUtils.replace(this, R.id.content_main, fragment, backStackName);
+            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
         } else if (id == R.id.nav_power) {
             sair();
         }

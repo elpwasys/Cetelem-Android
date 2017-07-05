@@ -45,7 +45,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DocumentScanActivity extends CetelemActivity implements ViewPager.OnPageChangeListener {
+public class DocumentScannerActivity extends CetelemActivity implements ViewPager.OnPageChangeListener {
 
     private int mPosition = -1;
 
@@ -62,13 +62,13 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
     @BindView(R.id.button_check) FloatingActionButton mCheckFloatingButton;
     @BindView(R.id.button_delete) FloatingActionButton mDeleteFloatingButton;
 
-    private static final String KEY_URI = DocumentScanActivity.class.getName() + ".mUris";
-    private static final String KEY_DOCUMENTOS = DocumentScanActivity.class.getName() + ".mDocumentos";
+    private static final String KEY_URI = DocumentScannerActivity.class.getName() + ".mUris";
+    private static final String KEY_DOCUMENTOS = DocumentScannerActivity.class.getName() + ".mDocumentos";
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
     public static Intent newIntent(Context context, ArrayList<Uri> uris, ArrayList<TipoDocumentoModel> documentos) {
-        Intent intent = new Intent(context, DocumentScanActivity.class);
+        Intent intent = new Intent(context, DocumentScannerActivity.class);
         Bundle extras = new Bundle();
         if (CollectionUtils.isNotEmpty(uris)) {
             extras.putParcelableArrayList(KEY_URI, uris);
@@ -91,7 +91,7 @@ public class DocumentScanActivity extends CetelemActivity implements ViewPager.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_document_scan);
+        setContentView(R.layout.activity_document_scanner);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.documentos);
         actionBar.setDisplayHomeAsUpEnabled(true);

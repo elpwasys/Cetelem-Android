@@ -23,12 +23,12 @@ public class Application extends br.com.wasys.library.Application {
                 .name("data.realm")
                 .build();
         Realm.setDefaultConfiguration(configuration);*/
-        /*Stetho.initialize(
+        Stetho.initialize(
                 Stetho.newInitializerBuilder(this)
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
                         .enableWebKitInspector(RealmInspectorModulesProvider.builder(this).build())
                         .build()
-        );*/
+        );
     }
 
     public static Application getInstance() {
