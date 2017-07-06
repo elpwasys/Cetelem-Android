@@ -21,5 +21,6 @@
         android:layout_height="match_parent"
         android:childDivider="@android:color/transparent"
         android:groupIndicator="@android:color/transparent"
+        android:focusable="true"
         />
 </LinearLayout>

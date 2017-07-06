@@ -24,7 +24,7 @@ import br.com.wasys.library.utils.FieldUtils;
  * Created by pascke on 03/07/17.
  */
 
-public class DocumentoListAdapter extends BaseExpandableListAdapter implements View.OnClickListener {
+public class DocumentoListAdapter extends BaseExpandableListAdapter {
 
     private Context mContext;
     private List<Group> mGroups;
@@ -120,8 +120,17 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter implements V
             holder.pendenciaLayout = (LinearLayout) convertView.findViewById(R.id.layout_pendencia);
             holder.observacaoTextView = (TextView) convertView.findViewById(R.id.text_observacao);
             holder.irregularidadeTextView = (TextView) convertView.findViewById(R.id.text_irregularidade);
-            holder.justificarButton = (ImageButton) convertView.findViewById(R.id.buttom_justificar);
-            holder.justificarButton.setOnClickListener(this);
+            holder.justificarImagem = (ImageView) convertView.findViewById(R.id.image_justificar);
+            holder.justificarImagem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ImageView imageView = (ImageView) view;
+                    DocumentoModel documento = (DocumentoModel) imageView.getTag();
+                    if (mDocumentoListAdapterListener != null) {
+                        mDocumentoListAdapterListener.onReplayClick(documento);
+                    }
+                }
+            });
             convertView.setTag(holder);
         }
         Group group = mGroups.get(groupPosition);
@@ -132,7 +141,7 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter implements V
         FieldUtils.setText(holder.versaoTextView, mContext.getString(R.string.documento_versao, documento.versaoAtual));
         holder.statusImagemView.setImageResource(documento.status.drawableRes);
         // PENDENCIA
-        holder.justificarButton.setTag(documento);
+        holder.justificarImagem.setTag(documento);
         holder.pendenciaLayout.setVisibility(View.GONE);
         if (DocumentoModel.Status.PENDENTE.equals(documento.status)) {
             holder.pendenciaLayout.setVisibility(View.VISIBLE);
@@ -145,17 +154,6 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter implements V
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view instanceof ImageButton) {
-            ImageButton button = (ImageButton) view;
-            DocumentoModel documento = (DocumentoModel) button.getTag();
-            if (mDocumentoListAdapterListener != null) {
-                mDocumentoListAdapterListener.onReplayClick(documento);
-            }
-        }
     }
 
     public void setDocumentoListAdapterListener(DocumentoListAdapterListener documentoListAdapterListener) {
@@ -192,7 +190,7 @@ public class DocumentoListAdapter extends BaseExpandableListAdapter implements V
         public LinearLayout pendenciaLayout;
         public TextView observacaoTextView;
         public TextView irregularidadeTextView;
-        public ImageButton justificarButton;
+        public ImageView justificarImagem;
     }
 
     public static interface DocumentoListAdapterListener {

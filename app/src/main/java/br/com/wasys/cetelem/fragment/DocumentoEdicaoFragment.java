@@ -18,6 +18,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -25,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,9 +46,12 @@ import br.com.wasys.cetelem.BuildConfig;
 import br.com.wasys.cetelem.Permission;
 import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.adapter.ImagePageAdapter;
+import br.com.wasys.cetelem.dialog.DigitalizacaoDialog;
+import br.com.wasys.cetelem.dialog.PendenciaDialog;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.model.ImagemModel;
+import br.com.wasys.cetelem.model.JustificativaModel;
 import br.com.wasys.cetelem.model.ResultModel;
 import br.com.wasys.cetelem.model.UploadModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
@@ -75,6 +80,12 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
     @BindView(R.id.text_view_versao) TextView mVersaoTextView;
     @BindView(R.id.image_view_status) ImageView mStatusImagemView;
 
+    // PENDENCIA
+    @BindView(R.id.text_observacao) TextView mObservacaoTextView;
+    @BindView(R.id.image_justificar) ImageView mJustificarImagem;
+    @BindView(R.id.layout_pendencia) LinearLayout mPendenciaLayout;
+    @BindView(R.id.text_irregularidade) TextView mIrregularidadeTextView;
+
     @BindView(R.id.pager) ViewPager mViewPager;
     @BindView(R.id.indicator) CirclePageIndicator mCirclePageIndicator;
     @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
@@ -83,6 +94,8 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
     private Long mId;
     private int mPosition = -1;
     private DocumentoModel mDocumento;
+    private DigitalizacaoModel mDigitalizacao;
+
     private ImagePageAdapter mImagePageAdapter;
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -173,6 +186,11 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         openScanner();
     }
 
+    @OnClick(R.id.button_info)
+    public void onInfoClick() {
+        startAsyncDigitalizacaoBy(mId);
+    }
+
     @OnClick(R.id.button_salvar)
     public void onSalvarClick() {
         List<ImagemModel> imagens = mImagePageAdapter.getModels();
@@ -203,7 +221,6 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     @OnClick(R.id.button_delete)
     public void onExclirClick() {
-        FragmentActivity activity = getActivity();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.excluir)
                 .setMessage(R.string.msg_deseja_excluir_registro)
@@ -230,6 +247,21 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         } else {
             mImagePageAdapter.deleteModelAt(mPosition);
         }
+    }
+
+    @OnClick(R.id.image_justificar)
+    public void onJustificarClick() {
+        PendenciaDialog dialog = PendenciaDialog.newInstance(mDocumento, new PendenciaDialog.OnPendenciaDialogListener() {
+            @Override
+            public void onJustificar(String justificativa) {
+                JustificativaModel justificativaModel = new JustificativaModel();
+                justificativaModel.id = mDocumento.id;
+                justificativaModel.texto = justificativa;
+                startAsyncJustificar(justificativaModel);
+            }
+        });
+        FragmentManager manager = getFragmentManager();
+        dialog.show(manager, dialog.getClass().getSimpleName());
     }
 
     private void startAsyncObter() {
@@ -266,14 +298,22 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
     private void onAsyncObterCompleted(DocumentoModel documentoModel) {
         mDocumento = documentoModel;
         Context context = getContext();
+        DocumentoModel.Status status = mDocumento.status;
         FieldUtils.setText(mDataTextView, mDocumento.dataDigitalizacao);
         FieldUtils.setText(mNomeTextView, mDocumento.nome);
         FieldUtils.setText(mVersaoTextView, mDocumento.versaoAtual);
-        FieldUtils.setText(mStatusTextView, context.getString(mDocumento.status.stringRes));
-        mStatusImagemView.setImageResource(mDocumento.status.drawableRes);
+        FieldUtils.setText(mVersaoTextView, getString(R.string.documento_versao, mDocumento.versaoAtual));
+        FieldUtils.setText(mStatusTextView, context.getString(status.stringRes));
+        mStatusImagemView.setImageResource(status.drawableRes);
         if (CollectionUtils.isNotEmpty(mDocumento.imagens)) {
             mImagePageAdapter.setModels(mDocumento.imagens);
             mCirclePageIndicator.notifyDataSetChanged();
+        }
+        mPendenciaLayout.setVisibility(View.GONE);
+        if (DocumentoModel.Status.PENDENTE.equals(status)) {
+            mPendenciaLayout.setVisibility(View.VISIBLE);
+            FieldUtils.setText(mObservacaoTextView, mDocumento.pendenciaObservacao);
+            FieldUtils.setText(mIrregularidadeTextView, mDocumento.irregularidadeNome);
         }
         setVisibilityActions();
     }
@@ -314,6 +354,13 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         }
     }
 
+    private void reenviar() {
+        String referencia = String.valueOf(mId);
+        DigitalizacaoModel.Tipo tipo = DigitalizacaoModel.Tipo.DOCUMENTO;
+        startDigitalizacaoService(getContext(), tipo, referencia);
+        Toast.makeText(getContext(), R.string.msg_documento_reenviado, Toast.LENGTH_LONG).show();
+    }
+
     private void onAsyncExcluirCompleted(ResultModel resultModel) {
         if (resultModel.success) {
             mImagePageAdapter.deleteModelAt(mPosition);
@@ -326,6 +373,38 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
             Snackbar.make(mDeleteFloatingActionButton, getString(R.string.msg_imagem_excluida_sucesso), Snackbar.LENGTH_LONG).show();
         }
         setVisibilityActions();
+    }
+
+    private void onAsyncJustificarCompleted(ResultModel model) {
+        Toast.makeText(getContext(), R.string.msg_justificativa_sucesso, Toast.LENGTH_LONG).show();
+        FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
+    }
+
+    private void onAsyncDigitalizacaoCompleted(DigitalizacaoModel model) {
+        mDigitalizacao = model;
+        if (mDigitalizacao == null) {
+            Toast.makeText(getContext(), R.string.msg_sem_info_digitalizacao, Toast.LENGTH_SHORT).show();
+        } else {
+            DigitalizacaoDialog dialog = DigitalizacaoDialog.newInstance(mDigitalizacao, new DigitalizacaoDialog.OnUplodErrorListener() {
+                @Override
+                public void onReenviar(boolean answer) {
+                    if (answer) {
+                        reenviar();
+                    }
+                }
+            });
+            FragmentManager fragmentManager = getFragmentManager();
+            dialog.show(fragmentManager, dialog.getClass().getSimpleName());
+        }
+    }
+
+    private void onAsyncSalvar(DigitalizacaoModel model) {
+        if (model != null) {
+            Context context = getContext();
+            startDigitalizacaoService(context, model.tipo, model.referencia);
+            Toast.makeText(getContext(), R.string.msg_documento_enviado_sucesso, Toast.LENGTH_LONG).show();
+            FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
+        }
     }
 
     private void startAsyncObter(Long id) {
@@ -392,13 +471,43 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
         });
     }
 
-    private void onAsyncSalvar(DigitalizacaoModel model) {
-        if (model != null) {
-            Context context = getContext();
-            startDigitalizacaoService(context, model.tipo, model.referencia);
-            Toast.makeText(getContext(), R.string.msg_documento_enviado_sucesso, Toast.LENGTH_LONG).show();
-            FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
-        }
+    private void startAsyncJustificar(JustificativaModel justificativaModel) {
+        showProgress();
+        Observable<ResultModel> observable = DocumentoService.Async.justificar(justificativaModel);
+        prepare(observable).subscribe(new Subscriber<ResultModel>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(ResultModel model) {
+                hideProgress();
+                onAsyncJustificarCompleted(model);
+            }
+        });
+    }
+
+    private void startAsyncDigitalizacaoBy(Long id) {
+        String referencia = String.valueOf(id);
+        Observable<DigitalizacaoModel> observable = DigitalizacaoService.Async.getBy(referencia, DigitalizacaoModel.Tipo.DOCUMENTO);
+        prepare(observable).subscribe(new Subscriber<DigitalizacaoModel>() {
+            @Override
+            public void onCompleted() {
+            }
+            @Override
+            public void onError(Throwable e) {
+                handle(e);
+            }
+            @Override
+            public void onNext(DigitalizacaoModel model) {
+                onAsyncDigitalizacaoCompleted(model);
+            }
+        });
     }
 
     @Override

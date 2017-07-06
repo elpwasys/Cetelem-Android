@@ -10,12 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <ImageView
             android:id="@+id/image_view_status"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="top|center_horizontal"
-            android:layout_marginRight="8dp"/>
+            android:layout_marginRight="8dp" />
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -39,11 +41,13 @@
                     android:textColor="@color/grey_500"
                     android:textAppearance="@android:style/TextAppearance.Small" />
             </LinearLayout>
+
             <TextView
                 android:id="@+id/text_view_status"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@android:style/TextAppearance.Small" />
+
             <TextView
                 android:id="@+id/text_view_versao"
                 android:layout_width="match_parent"
@@ -80,8 +84,8 @@
                 android:textAppearance="@android:style/TextAppearance.Small"
                 android:textColor="@color/red_pending" />
         </LinearLayout>
-        <ImageButton
-            android:id="@+id/buttom_justificar"
+        <ImageView
+            android:id="@+id/image_justificar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|center_vertical"
@@ -93,6 +97,6 @@
             android:elevation="6dp"
             android:padding="6dp"
             android:src="@drawable/ic_reply"
-            android:tint="@color/blue_800" />
+            android:tint="@color/blue_800"/>
     </LinearLayout>
 </LinearLayout>

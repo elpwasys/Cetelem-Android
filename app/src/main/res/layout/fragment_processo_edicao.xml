@@ -65,11 +65,11 @@
                 </LinearLayout>
                 <ImageButton
                     android:id="@+id/button_info"
+                    style="?android:attr/buttonBarStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_info"
                     android:layout_gravity="center"
-                    style="?android:attr/buttonBarStyle" />
+                    android:src="@drawable/ic_info" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -79,18 +79,25 @@
         android:layout_weight="1">
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
             <LinearLayout
                 android:id="@+id/layout_fields"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingLeft="@dimen/activity_padding"
-                android:paddingRight="@dimen/activity_padding"
                 android:paddingBottom="@dimen/activity_padding"
-                />
+                android:paddingLeft="@dimen/activity_padding"
+                android:paddingRight="@dimen/activity_padding" />
         </ScrollView>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_editar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_edit"
+            android:tint="@android:color/white"
+            app:backgroundTint="@color/colorAccent"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_salvar"
             android:layout_width="wrap_content"
@@ -99,7 +106,8 @@
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_save"
             android:tint="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"/>
+            app:backgroundTint="@color/colorPrimary"
+            android:visibility="gone"/>
     </FrameLayout>
 </LinearLayout>
 

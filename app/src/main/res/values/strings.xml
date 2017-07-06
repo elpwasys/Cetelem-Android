@@ -105,5 +105,9 @@
     <string name="justificar">Justificar</string>
     <string name="justificativa">Justificativa</string>
     <string name="msg_justificativa_sucesso">Justificativa enviada com sucesso</string>
+    <string name="msg_documento_reenviado">Documento reenviado com sucesso</string>
+    <string name="msg_sem_info_digitalizacao">Não há informações de digitalização</string>
+    <string name="msg_editar_processo">Os documentos terão de ser analisados novamente.\nTem certeza que deseja prosseguir?</string>
+    <string name="editar">Editar</string>
 
 </resources>

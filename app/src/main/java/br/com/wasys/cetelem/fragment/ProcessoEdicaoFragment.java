@@ -1,10 +1,13 @@
 package br.com.wasys.cetelem.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,8 +54,10 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     @BindView(R.id.text_view_status) TextView mStatusTextView;
     @BindView(R.id.text_view_data) TextView mDataTextView;
     @BindView(R.id.text_view_tipo_processo) TextView mTipoTextView;
-
     @BindView(R.id.image_view_status) ImageView mStatusImageView;
+
+    @BindView(R.id.button_editar) FloatingActionButton mEditarFloatingActionButton;
+    @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
 
     private Long mId;
     private ProcessoModel mProcesso;
@@ -116,6 +121,42 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
     public void onInfoClick() {
         if (mId != null) {
             startAsyncDigitalizacaoBy(mId);
+        }
+    }
+
+    @OnClick(R.id.button_editar)
+    public void onEditarClick() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.editar)
+                .setMessage(R.string.msg_editar_processo)
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editar();
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void editar() {
+        int childCount = mLayoutFields.getChildCount();
+        if (childCount > 0) {
+            for (int i = 0; i < childCount; i++) {
+                View view = mLayoutFields.getChildAt(i);
+                if (view instanceof AppGroupInputLayout) {
+                    AppGroupInputLayout grupoLayout = (AppGroupInputLayout) view;
+                    grupoLayout.setEnabled(true);
+                }
+            }
+            mEditarFloatingActionButton.setVisibility(View.GONE);
+            mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -189,6 +230,7 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
                 AppGroupInputLayout campoGrupoLayout = new AppGroupInputLayout(context);
                 campoGrupoLayout.setOrientation(LinearLayout.VERTICAL);
                 campoGrupoLayout.setGrupo(grupo);
+                campoGrupoLayout.setEnabled(false);
                 mLayoutFields.addView(campoGrupoLayout);
             }
         }
@@ -224,7 +266,9 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
 
     private void onAsyncDigitalizacaoCompleted(DigitalizacaoModel model) {
         mDigitalizacao = model;
-        if (mDigitalizacao != null) {
+        if (mDigitalizacao == null) {
+            Toast.makeText(getContext(), R.string.msg_sem_info_digitalizacao, Toast.LENGTH_SHORT).show();
+        } else {
             DigitalizacaoDialog dialog = DigitalizacaoDialog.newInstance(mDigitalizacao, new DigitalizacaoDialog.OnUplodErrorListener() {
                 @Override
                 public void onReenviar(boolean answer) {

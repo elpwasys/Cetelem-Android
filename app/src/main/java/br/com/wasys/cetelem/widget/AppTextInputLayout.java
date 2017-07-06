@@ -79,6 +79,14 @@ public class AppTextInputLayout extends TextInputLayout {
         addView(mEditText);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (mEditText != null) {
+            mEditText.setEnabled(enabled);
+        }
+    }
+
     public String getValue() {
         if (!mEditText.isValid()) {
             return null;

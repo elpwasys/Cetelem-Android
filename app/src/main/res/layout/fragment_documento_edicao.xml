@@ -39,18 +39,84 @@
                     android:textColor="@color/grey_500"
                     android:textAppearance="@android:style/TextAppearance.Small" />
             </LinearLayout>
-            <TextView
-                android:id="@+id/text_view_status"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@android:style/TextAppearance.Small" />
-            <TextView
-                android:id="@+id/text_view_versao"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/grey_500"
-                android:textAppearance="@android:style/TextAppearance.Small" />
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/text_view_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@android:style/TextAppearance.Small" />
+                    <TextView
+                        android:id="@+id/text_view_versao"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@android:style/TextAppearance.Small"
+                        android:textColor="@color/grey_500" />
+                </LinearLayout>
+                <ImageButton
+                    android:id="@+id/button_info"
+                    style="?android:attr/buttonBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_info"
+                    />
+            </LinearLayout>
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/layout_pendencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/activity_padding"
+        android:paddingRight="@dimen/activity_padding"
+        android:paddingBottom="@dimen/activity_padding"
+        android:visibility="gone"
+        >
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingTop="8dp">
+            <TextView
+                android:id="@+id/text_irregularidade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@android:style/TextAppearance.Small"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/red_pending" />
+            <TextView
+                android:id="@+id/text_observacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@android:style/TextAppearance.Small"
+                android:textColor="@color/red_pending" />
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/image_justificar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_vertical"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_circle"
+            android:elevation="6dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_reply"
+            android:tint="@color/blue_800"/>
     </LinearLayout>
     <FrameLayout
         android:layout_width="match_parent"

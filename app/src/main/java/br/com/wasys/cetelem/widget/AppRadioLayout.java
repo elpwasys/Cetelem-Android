@@ -50,6 +50,18 @@ public class AppRadioLayout extends LinearLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        if (mRadioGroup != null) {
+            int childCount = mRadioGroup.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                RadioButton radioButton = (RadioButton) mRadioGroup.getChildAt(i);
+                radioButton.setEnabled(enabled);
+            }
+        }
+    }
+
     public void configurar(CampoModel campo) {
 
         removeAllViews();

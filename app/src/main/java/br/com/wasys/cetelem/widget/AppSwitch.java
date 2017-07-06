@@ -80,6 +80,15 @@ public class AppSwitch extends LinearLayout {
         }
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        Switch aSwitch = (Switch) findViewWithTag(mNome);
+        if (aSwitch != null) {
+            aSwitch.setEnabled(enabled);
+        }
+    }
+
     public String getValue() {
         Switch aSwitch = (Switch) findViewWithTag(mNome);
         boolean checked = aSwitch.isChecked();

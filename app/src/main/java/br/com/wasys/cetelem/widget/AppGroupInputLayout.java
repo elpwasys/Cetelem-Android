@@ -59,6 +59,27 @@ public class AppGroupInputLayout extends LinearLayout {
         createFields();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        int childCount = getChildCount();
+        if (childCount > 0) {
+            for (int i = 0; i < childCount; i++) {
+                View view = getChildAt(i);
+                if (view instanceof AppTextInputLayout) {
+                    AppTextInputLayout campoLayout = (AppTextInputLayout) view;
+                    campoLayout.setEnabled(enabled);
+                } else if (view instanceof AppSwitch) {
+                    AppSwitch aSwitch = (AppSwitch) view;
+                    aSwitch.setEnabled(enabled);
+                } else if (view instanceof AppRadioLayout) {
+                    AppRadioLayout radioLayout = (AppRadioLayout) view;
+                    radioLayout.setEnabled(enabled);
+                }
+            }
+        }
+    }
+
     private void createHeader() {
 
         Context context = getContext();
