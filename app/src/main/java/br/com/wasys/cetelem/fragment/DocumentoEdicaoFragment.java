@@ -377,7 +377,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     private void onAsyncJustificarCompleted(ResultModel model) {
         Toast.makeText(getContext(), R.string.msg_justificativa_sucesso, Toast.LENGTH_LONG).show();
-        FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
+        FragmentUtils.popBackStackImmediate(getActivity(), getBackStackName());
     }
 
     private void onAsyncDigitalizacaoCompleted(DigitalizacaoModel model) {
@@ -403,7 +403,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
             Context context = getContext();
             startDigitalizacaoService(context, model.tipo, model.referencia);
             Toast.makeText(getContext(), R.string.msg_documento_enviado_sucesso, Toast.LENGTH_LONG).show();
-            FragmentUtils.popBackStackImmediate(getActivity(), getClass().getSimpleName());
+            FragmentUtils.popBackStackImmediate(getActivity(), getBackStackName());
         }
     }
 

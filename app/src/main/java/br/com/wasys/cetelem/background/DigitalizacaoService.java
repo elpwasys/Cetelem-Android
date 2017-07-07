@@ -164,6 +164,7 @@ public class DigitalizacaoService extends Service {
         Realm realm = Realm.getDefaultInstance();
         try {
             Log.d(TAG, "Listando registros de arquivos da digitalizacao para excluir...");
+            realm.beginTransaction();
             Digitalizacao digitalizacao = realm.where(Digitalizacao.class)
                     .equalTo("id", id)
                     .findFirst();
@@ -174,7 +175,6 @@ public class DigitalizacaoService extends Service {
                     caminhos.add(arquivo.caminho);
                 }
                 Log.d(TAG, "Excluindo registros de arquivos...");
-                realm.beginTransaction();
                 arquivos.deleteAllFromRealm();
                 realm.commitTransaction();
                 Log.d(TAG, "Sucesso na exclusao dos registros de arquivos.");
@@ -190,6 +190,9 @@ public class DigitalizacaoService extends Service {
             }
         } catch (Throwable e) {
             Log.e(TAG, "Falha na exclusao dos registros da digitalizacao.", e);
+            if (realm.isInTransaction()) {
+                realm.cancelTransaction();
+            }
             throw e;
         } finally {
             realm.close();
@@ -204,10 +207,10 @@ public class DigitalizacaoService extends Service {
         Realm realm = Realm.getDefaultInstance();
         try {
             Log.d(TAG, "Atualizando status da digitalizacao para " + status.name() + "...");
+            realm.beginTransaction();
             Digitalizacao digitalizacao = realm.where(Digitalizacao.class)
                     .equalTo("id", id)
                     .findFirst();
-            realm.beginTransaction();
             digitalizacao.status = status.name();
             digitalizacao.mensagem = mensagem;
             Date data = new Date();
@@ -223,6 +226,9 @@ public class DigitalizacaoService extends Service {
             Log.d(TAG, "Sucesso na atualizacao da digitalizacao.");
         } catch (Throwable e) {
             Log.e(TAG, "Falha na atualizacao da digitalizacao.", e);
+            if (realm.isInTransaction()) {
+                realm.cancelTransaction();
+            }
             throw e;
         } finally {
             realm.close();

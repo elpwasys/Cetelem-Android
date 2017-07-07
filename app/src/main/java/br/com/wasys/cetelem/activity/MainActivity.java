@@ -114,11 +114,11 @@ public class MainActivity extends CetelemActivity
         if (id == R.id.nav_plus) {
             FragmentUtils.popAllBackStackImmediate(this);
             ProcessoNovoFragment fragment = ProcessoNovoFragment.newInstance();
-            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
+            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getBackStackName());
         } else if (id == R.id.nav_search) {
             FragmentUtils.popAllBackStackImmediate(this);
             ProcessoPesquisaFragment fragment = ProcessoPesquisaFragment.newInstance();
-            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
+            FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getBackStackName());
         } else if (id == R.id.nav_power) {
             sair();
         }

@@ -31,6 +31,10 @@ public abstract class CetelemFragment extends AppFragment {
         super.onPause();
     }
 
+    public String getBackStackName() {
+        return getClass().getSimpleName();
+    }
+
     protected void setTitle(int id) {
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         ActionBar actionBar = activity.getSupportActionBar();

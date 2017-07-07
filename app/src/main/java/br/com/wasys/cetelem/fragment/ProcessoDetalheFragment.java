@@ -47,7 +47,7 @@ import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitali
  * Created by pascke on 24/06/17.
  */
 
-public class ProcessoEdicaoFragment extends CetelemFragment {
+public class ProcessoDetalheFragment extends CetelemFragment {
 
     @BindView(R.id.layout_fields) LinearLayout mLayoutFields;
     @BindView(R.id.text_view_id) TextView mIdTextView;
@@ -65,10 +65,10 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
 
     private Snackbar mSnackbar;
 
-    private static final String KEY_ID = ProcessoEdicaoFragment.class.getName() + ".id";
+    private static final String KEY_ID = ProcessoDetalheFragment.class.getName() + ".id";
 
-    public static ProcessoEdicaoFragment newInstance(Long id) {
-        ProcessoEdicaoFragment fragment = new ProcessoEdicaoFragment();
+    public static ProcessoDetalheFragment newInstance(Long id) {
+        ProcessoDetalheFragment fragment = new ProcessoDetalheFragment();
         if (id != null) {
             Bundle bundle = new Bundle();
             bundle.putLong(KEY_ID, id);
@@ -90,7 +90,7 @@ public class ProcessoEdicaoFragment extends CetelemFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_processo_edicao, container, false);
+        View view = inflater.inflate(R.layout.fragment_processo_detalhe, container, false);
         ButterKnife.bind(this, view);
         return view;
     }

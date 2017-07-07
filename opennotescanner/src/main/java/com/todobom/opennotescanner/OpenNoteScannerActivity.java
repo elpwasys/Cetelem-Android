@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.ExifInterface;
@@ -65,6 +66,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -890,11 +892,30 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
         Log.d(TAG, "wrote: " + fileName);
 
+        String path = fileUri.getPath();
+        try {
+            File file = new File(path);
+            Log.d(TAG, "Comprimindo imagem: '" + path + "' length " + file.length() + ".");
+            resize(fileUri);
+            Log.d(TAG, "Imagem comprimida length " + file.length() + ".");
+        } catch (IOException e) {
+            Log.e(TAG, "Erro ao comprimir imagem: '" + path + "'.", e);
+            e.printStackTrace();
+        }
         //animateDocument(fileName, scannedDocument);
         new File(fileName).delete();
         setResult(RESULT_OK, intent);
         finish();
         refreshCamera();
+    }
+
+    public void resize(Uri uri) throws IOException {
+        String path = uri.getPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        FileOutputStream outputStream = new FileOutputStream(path);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.flush();
+        outputStream.close();
     }
 
     class AnimationRunnable implements Runnable {

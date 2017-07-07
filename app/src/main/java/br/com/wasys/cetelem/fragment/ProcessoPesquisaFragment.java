@@ -182,7 +182,7 @@ public class ProcessoPesquisaFragment extends CetelemFragment implements Adapter
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Adapter adapter = parent.getAdapter();
         ProcessoModel processo = (ProcessoModel) adapter.getItem(position);
-        ProcessoEdicaoFragment fragment = ProcessoEdicaoFragment.newInstance(processo.id);
+        ProcessoDetalheFragment fragment = ProcessoDetalheFragment.newInstance(processo.id);
         FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
     }
 }

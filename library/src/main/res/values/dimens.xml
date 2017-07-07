@@ -1,0 +1,10 @@
+<resources>
+    <dimen name="default_margin">16dp</dimen>
+    <dimen name="default_padding">16dp</dimen>
+    <dimen name="activity_margin">@dimen/default_margin</dimen>
+    <dimen name="activity_padding">@dimen/default_padding</dimen>
+    <dimen name="activity_vertical_margin">@dimen/activity_margin</dimen>
+    <dimen name="activity_horizontal_margin">@dimen/activity_margin</dimen>
+    <dimen name="activity_vertical_padding">@dimen/activity_padding</dimen>
+    <dimen name="activity_horizontal_padding">@dimen/activity_padding</dimen>
+</resources>

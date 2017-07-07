@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -38,5 +39,14 @@ public class ImageUtils {
             }
         }
         return inSampleSize;
+    }
+
+    public static void resize(Uri uri) throws IOException {
+        String path = uri.getPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(path);
+        FileOutputStream outputStream = new FileOutputStream(path);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+        outputStream.flush();
+        outputStream.close();
     }
 }

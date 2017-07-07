@@ -285,17 +285,18 @@ public class ProcessoNovoFragment extends CetelemFragment {
 
     private void startService(Long id) {
 
-        Context context = getContext();
         String referencia = String.valueOf(id);
 
         DigitalizacaoModel.Tipo tipo = DigitalizacaoModel.Tipo.TIPIFICACAO;
         startDigitalizacaoService(getContext(), tipo, referencia);
         Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_LONG).show();
 
-        String backStackName = ProcessoPesquisaFragment.class.getSimpleName();
-        FragmentUtils.popBackStackImmediate(getActivity(), backStackName);
-        ProcessoEdicaoFragment fragment = ProcessoEdicaoFragment.newInstance(id);
-        FragmentUtils.replace(getActivity(), R.id.content_main, fragment, backStackName);
+        FragmentActivity activity = getActivity();
+
+        FragmentUtils.popBackStackImmediate(activity, getBackStackName());
+
+        ProcessoDetalheFragment fragment = ProcessoDetalheFragment.newInstance(id);
+        FragmentUtils.replace(activity, R.id.content_main, fragment, fragment.getBackStackName());
     }
 
     private boolean validate() {
