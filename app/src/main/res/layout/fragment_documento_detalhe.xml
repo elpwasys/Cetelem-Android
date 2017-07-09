@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="br.com.wasys.cetelem.fragment.DocumentoEdicaoFragment">
+    tools:context="br.com.wasys.cetelem.fragment.DocumentoDetalheFragment">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -147,6 +147,7 @@
             android:layout_gravity="top|start"
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_camera"
+            android:visibility="gone"
             app:fabSize="mini"
             app:backgroundTint="@android:color/white"/>
         <android.support.design.widget.FloatingActionButton
@@ -157,8 +158,8 @@
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_save"
             android:tint="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            app:backgroundTint="@color/colorPrimary" />
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_delete"
             android:layout_width="wrap_content"

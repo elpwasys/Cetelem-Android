@@ -35,6 +35,7 @@ import com.viewpagerindicator.CirclePageIndicator;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,7 +73,7 @@ import static br.com.wasys.cetelem.background.DigitalizacaoService.startDigitali
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPager.OnPageChangeListener {
+public class DocumentoDetalheFragment extends CetelemFragment implements ViewPager.OnPageChangeListener {
 
     @BindView(R.id.text_view_data) TextView mDataTextView;
     @BindView(R.id.text_view_nome) TextView mNomeTextView;
@@ -88,6 +89,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     @BindView(R.id.pager) ViewPager mViewPager;
     @BindView(R.id.indicator) CirclePageIndicator mCirclePageIndicator;
+    @BindView(R.id.button_scan) FloatingActionButton mScanFloatingActionButton;
     @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
     @BindView(R.id.button_delete) FloatingActionButton mDeleteFloatingActionButton;
 
@@ -99,10 +101,10 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
     private ImagePageAdapter mImagePageAdapter;
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final String KEY_ID = DocumentoEdicaoFragment.class.getName() + ".id"; // Pk do Documento
+    private static final String KEY_ID = DocumentoDetalheFragment.class.getName() + ".id"; // Pk do Documento
 
-    public static DocumentoEdicaoFragment newInstance(Long id) {
-        DocumentoEdicaoFragment fragment = new DocumentoEdicaoFragment();
+    public static DocumentoDetalheFragment newInstance(Long id) {
+        DocumentoDetalheFragment fragment = new DocumentoDetalheFragment();
         if (id != null) {
             Bundle bundle = new Bundle();
             bundle.putLong(KEY_ID, id);
@@ -124,7 +126,7 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_documento_edicao, container, false);
+        View view = inflater.inflate(R.layout.fragment_documento_detalhe, container, false);
         setTitle(R.string.titulo_documento);
         ButterKnife.bind(this, view);
         Context context = getContext();
@@ -285,13 +287,17 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
 
     private void setVisibilityActions() {
         mSalvarFloatingActionButton.setVisibility(View.GONE);
-        boolean has = hasUpload();
-        if (has) {
-            mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
+        if (BooleanUtils.isTrue(mDocumento.digitalizavel)) {
+            boolean has = hasUpload();
+            if (has) {
+                mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
+            }
         }
         mDeleteFloatingActionButton.setVisibility(View.GONE);
-        if (mImagePageAdapter.getCount() > 0) {
-            mDeleteFloatingActionButton.setVisibility(View.VISIBLE);
+        if (BooleanUtils.isTrue(mDocumento.podeExcluir)) {
+            if (mImagePageAdapter.getCount() > 0) {
+                mDeleteFloatingActionButton.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -314,6 +320,10 @@ public class DocumentoEdicaoFragment extends CetelemFragment implements ViewPage
             mPendenciaLayout.setVisibility(View.VISIBLE);
             FieldUtils.setText(mObservacaoTextView, mDocumento.pendenciaObservacao);
             FieldUtils.setText(mIrregularidadeTextView, mDocumento.irregularidadeNome);
+        }
+        mScanFloatingActionButton.setVisibility(View.GONE);
+        if (BooleanUtils.isTrue(mDocumento.digitalizavel)) {
+            mScanFloatingActionButton.setVisibility(View.VISIBLE);
         }
         setVisibilityActions();
     }

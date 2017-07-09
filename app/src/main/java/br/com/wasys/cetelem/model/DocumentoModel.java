@@ -19,8 +19,12 @@ public class DocumentoModel extends Model {
     public Status status;
     public Integer versaoAtual;
     public Integer qtdeImagens;
-    public Boolean obrigatorio;
     public Date dataDigitalizacao;
+
+    public Boolean obrigatorio;
+    public Boolean podeExcluir;
+    public Boolean justificavel;
+    public Boolean digitalizavel;
 
     public String irregularidadeNome;
     public String pendenciaObservacao;

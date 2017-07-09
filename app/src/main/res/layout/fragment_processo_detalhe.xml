@@ -89,6 +89,22 @@
                 android:paddingLeft="@dimen/activity_padding"
                 android:paddingRight="@dimen/activity_padding" />
         </ScrollView>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_enviar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="88dp"
+            android:src="@drawable/ic_send"
+            android:tint="@android:color/white"
+            android:clickable="true"
+            android:visibility="gone"
+            app:fabSize="mini"
+            app:backgroundTint="@color/colorPrimary"/>
+
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_editar"
             android:layout_width="wrap_content"
@@ -97,7 +113,9 @@
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_edit"
             android:tint="@android:color/white"
+            android:visibility="gone"
             app:backgroundTint="@color/colorAccent"/>
+
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_salvar"
             android:layout_width="wrap_content"
@@ -106,8 +124,9 @@
             android:layout_margin="@dimen/fab_margin"
             android:src="@drawable/ic_save"
             android:tint="@android:color/white"
-            app:backgroundTint="@color/colorPrimary"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            app:backgroundTint="@color/colorPrimary" />
+
     </FrameLayout>
 </LinearLayout>
 

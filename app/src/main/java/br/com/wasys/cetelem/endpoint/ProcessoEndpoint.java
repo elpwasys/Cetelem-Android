@@ -6,8 +6,8 @@ import br.com.wasys.cetelem.dataset.meta.TipoProcessoMeta;
 import br.com.wasys.cetelem.model.PesquisaModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
-import br.com.wasys.cetelem.paging.PagingModel;
 import br.com.wasys.cetelem.paging.ProcessoPagingModel;
+import br.com.wasys.cetelem.model.ProcessoRegraModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -23,7 +23,10 @@ public interface ProcessoEndpoint {
     Call<DataSet<ProcessoModel, ProcessoMeta>> getDataSet();
 
     @GET("processo/editar/{id}")
-    Call<ProcessoModel> editar(@Path("id") Long id);
+    Call<DataSet<ProcessoModel, ProcessoRegraModel>> editar(@Path("id") Long id);
+
+    @GET("processo/enviar/{id}")
+    Call<DataSet<ProcessoModel, ProcessoRegraModel>> enviar(@Path("id") Long id);
 
     @GET("processo/tipo/dataset/{id}")
     Call<DataSet<TipoProcessoModel, TipoProcessoMeta>> getTipoDataSet(@Path("id") Long id);

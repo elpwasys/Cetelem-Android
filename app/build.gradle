@@ -22,11 +22,11 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-            buildConfigField 'String', 'BASE_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/\""
+            /*buildConfigField 'String', 'BASE_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/rest/\""
+            buildConfigField 'String', 'SERVER_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/\""*/
 
-            /*buildConfigField 'String', 'BASE_URL', "\"http://192.168.100.4:8080/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://192.168.100.4:8080/cetelem/\""*/
+            buildConfigField 'String', 'BASE_URL', "\"http://192.168.100.4:8080/cetelem/rest/\""
+            buildConfigField 'String', 'SERVER_URL', "\"http://192.168.100.4:8080/cetelem/\""
 
             /*buildConfigField 'String', 'BASE_URL', "\"http://192.168.100.13:8080/cetelem/rest/\""
             buildConfigField 'String', 'SERVER_URL', "\"http://192.168.100.13:8080/cetelem/\""*/

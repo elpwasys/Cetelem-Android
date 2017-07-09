@@ -3,6 +3,7 @@ package br.com.wasys.cetelem.endpoint;
 import java.util.ArrayList;
 
 import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dataset.meta.DocumentoMeta;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.model.JustificativaModel;
 import br.com.wasys.cetelem.model.ProcessoLogModel;
@@ -25,6 +26,9 @@ public interface DocumentoEndpoint {
     @POST("documento/justificar")
     Call<ResultModel> justificar(@Body JustificativaModel justificativaModel);
 
+    @GET("documento/enviar/{id}")
+    Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> enviar(@Path("id") Long id);
+
     @GET("documento/dataset/{id}")
-    Call<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> getDataSet(@Path("id") Long id);
+    Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> getDataSet(@Path("id") Long id);
 }

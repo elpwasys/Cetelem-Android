@@ -13,6 +13,7 @@ import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.UploadModel;
+import br.com.wasys.cetelem.model.ProcessoRegraModel;
 import br.com.wasys.library.service.Service;
 import retrofit2.Call;
 import rx.Observable;
@@ -35,11 +36,19 @@ public class ProcessoService extends Service {
         return result;
     }
 
-    public static ProcessoModel editar(Long id) throws Throwable {
+
+    public static DataSet<ProcessoModel, ProcessoRegraModel> enviar(Long id) throws Throwable {
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<ProcessoModel> call = endpoint.editar(id);
-        ProcessoModel processoModel = Endpoint.execute(call);
-        return processoModel;
+        Call<DataSet<ProcessoModel, ProcessoRegraModel>> call = endpoint.enviar(id);
+        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = Endpoint.execute(call);
+        return dataSet;
+    }
+
+    public static DataSet<ProcessoModel, ProcessoRegraModel> editar(Long id) throws Throwable {
+        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
+        Call<DataSet<ProcessoModel, ProcessoRegraModel>> call = endpoint.editar(id);
+        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = Endpoint.execute(call);
+        return dataSet;
     }
 
     public static DataSet<ProcessoModel, ProcessoMeta> getDataSet() throws Throwable {
@@ -73,13 +82,28 @@ public class ProcessoService extends Service {
             });
         }
 
-        public static Observable<ProcessoModel> editar(final Long id) {
-            return Observable.create(new Observable.OnSubscribe<ProcessoModel>() {
+        public static Observable<DataSet<ProcessoModel, ProcessoRegraModel>> enviar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoRegraModel>>() {
                 @Override
-                public void call(Subscriber<? super ProcessoModel> subscriber) {
+                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoRegraModel>> subscriber) {
                     try {
-                        ProcessoModel processoModel = ProcessoService.editar(id);
-                        subscriber.onNext(processoModel);
+                        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = ProcessoService.enviar(id);
+                        subscriber.onNext(dataSet);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+
+        public static Observable<DataSet<ProcessoModel, ProcessoRegraModel>> editar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoRegraModel>>() {
+                @Override
+                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoRegraModel>> subscriber) {
+                    try {
+                        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = ProcessoService.editar(id);
+                        subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {
                         subscriber.onError(e);

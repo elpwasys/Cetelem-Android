@@ -20,16 +20,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.ArrayList;
 
 import br.com.wasys.cetelem.R;
+import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dialog.DigitalizacaoDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
 import br.com.wasys.cetelem.model.TipoProcessoModel;
+import br.com.wasys.cetelem.model.ProcessoRegraModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
@@ -58,9 +61,11 @@ public class ProcessoDetalheFragment extends CetelemFragment {
 
     @BindView(R.id.button_editar) FloatingActionButton mEditarFloatingActionButton;
     @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
+    @BindView(R.id.button_enviar) FloatingActionButton mEnviarFloatingActionButton;
 
     private Long mId;
     private ProcessoModel mProcesso;
+    private ProcessoRegraModel mRegra;
     private DigitalizacaoModel mDigitalizacao;
 
     private Snackbar mSnackbar;
@@ -124,6 +129,11 @@ public class ProcessoDetalheFragment extends CetelemFragment {
         }
     }
 
+    @OnClick(R.id.button_salvar)
+    public void onSalvarClick() {
+        startAsyncSalvar();
+    }
+
     @OnClick(R.id.button_editar)
     public void onEditarClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -145,6 +155,27 @@ public class ProcessoDetalheFragment extends CetelemFragment {
         dialog.show();
     }
 
+    @OnClick(R.id.button_enviar)
+    public void onEviarClick() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.editar)
+                .setMessage(R.string.msg_enviar_processo)
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    startAsyncEnviar(mId);
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startAsyncEnviar(mId);
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private void editar() {
         int childCount = mLayoutFields.getChildCount();
         if (childCount > 0) {
@@ -158,11 +189,6 @@ public class ProcessoDetalheFragment extends CetelemFragment {
             mEditarFloatingActionButton.setVisibility(View.GONE);
             mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
         }
-    }
-
-    @OnClick(R.id.button_salvar)
-    public void onSalvarClick() {
-        startAsyncSalvar();
     }
 
     private void iniciar() {
@@ -212,9 +238,10 @@ public class ProcessoDetalheFragment extends CetelemFragment {
         Toast.makeText(getContext(), R.string.msg_processo_salvo_sucesso, Toast.LENGTH_SHORT).show();
     }
 
-    private void onAsyncEdicaoCompleted(ProcessoModel model) {
+    private void onAsyncEdicaoCompleted(DataSet<ProcessoModel, ProcessoRegraModel> dataSet) {
 
-        mProcesso = model;
+        mRegra = dataSet.meta;
+        mProcesso = dataSet.data;
 
         TipoProcessoModel tipoProcesso = mProcesso.tipoProcesso;
         FieldUtils.setText(mIdTextView, mProcesso.id);
@@ -224,6 +251,7 @@ public class ProcessoDetalheFragment extends CetelemFragment {
 
         mStatusImageView.setImageResource(mProcesso.status.drawableRes);
 
+        mLayoutFields.removeAllViews();
         if (CollectionUtils.isNotEmpty(mProcesso.gruposCampos)) {
             Context context = getContext();
             for (CampoGrupoModel grupo : mProcesso.gruposCampos) {
@@ -247,6 +275,16 @@ public class ProcessoDetalheFragment extends CetelemFragment {
                 }
             });
             snackbar.show();
+        }
+
+        mEditarFloatingActionButton.setVisibility(View.GONE);
+        if (mRegra.podeEditar) {
+            mEditarFloatingActionButton.setVisibility(View.VISIBLE);
+        }
+
+        mEnviarFloatingActionButton.setVisibility(View.GONE);
+        if (mRegra.podeEnviar && MapUtils.isEmpty(mRegra.pendencias)) {
+            mEnviarFloatingActionButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -289,8 +327,8 @@ public class ProcessoDetalheFragment extends CetelemFragment {
      */
     private void startAsyncEdicaoById(Long id) {
         showProgress();
-        Observable<ProcessoModel> observable = ProcessoService.Async.editar(id);
-        prepare(observable).subscribe(new Subscriber<ProcessoModel>() {
+        Observable<DataSet<ProcessoModel, ProcessoRegraModel>> observable = ProcessoService.Async.editar(id);
+        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoRegraModel>>() {
             @Override
             public void onCompleted() {
                 hideProgress();
@@ -301,9 +339,31 @@ public class ProcessoDetalheFragment extends CetelemFragment {
                 handle(e);
             }
             @Override
-            public void onNext(ProcessoModel processoModel) {
+            public void onNext(DataSet<ProcessoModel, ProcessoRegraModel> dataSet) {
                 hideProgress();
-                onAsyncEdicaoCompleted(processoModel);
+                onAsyncEdicaoCompleted(dataSet);
+            }
+        });
+    }
+
+    private void startAsyncEnviar(Long id) {
+        showProgress();
+        Observable<DataSet<ProcessoModel, ProcessoRegraModel>> observable = ProcessoService.Async.enviar(id);
+        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoRegraModel>>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(DataSet<ProcessoModel, ProcessoRegraModel> dataSet) {
+                hideProgress();
+                Toast.makeText(getContext(), R.string.msg_processo_enviado_sucesso, Toast.LENGTH_SHORT).show();
+                onAsyncEdicaoCompleted(dataSet);
             }
         });
     }
@@ -325,7 +385,6 @@ public class ProcessoDetalheFragment extends CetelemFragment {
             }
         });
     }
-
 
     private void startAsyncCheckErrorById(Long id) {
         String referencia = String.valueOf(id);

@@ -3,14 +3,17 @@ package br.com.wasys.cetelem.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.File;
@@ -32,19 +36,24 @@ import br.com.wasys.cetelem.R;
 import br.com.wasys.cetelem.activity.DocumentScannerActivity;
 import br.com.wasys.cetelem.adapter.DocumentoListAdapter;
 import br.com.wasys.cetelem.dataset.DataSet;
+import br.com.wasys.cetelem.dataset.meta.DocumentoMeta;
 import br.com.wasys.cetelem.dialog.PendenciaDialog;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.model.JustificativaModel;
 import br.com.wasys.cetelem.model.ProcessoLogModel;
+import br.com.wasys.cetelem.model.ProcessoModel;
+import br.com.wasys.cetelem.model.ProcessoRegraModel;
 import br.com.wasys.cetelem.model.ResultModel;
 import br.com.wasys.cetelem.model.UploadModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.DocumentoService;
+import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.library.utils.FieldUtils;
 import br.com.wasys.library.utils.FragmentUtils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -57,13 +66,18 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
 
     @BindView(R.id.list_view) ExpandableListView mListView;
     @BindView(R.id.text_pendencia) TextView mPendenciaTextView;
+    @BindView(R.id.button_enviar) FloatingActionButton mEnviarFloatingActionButton;
 
     private Long mId;
+
+    private ProcessoRegraModel mRegra;
     private ArrayList<Uri> mUris;
+
     private List<DocumentoListAdapter.Group> mGroups;
 
     private static final int REQUEST_SCAN = 1;
     private static final String KEY_ID = DocumentoListaFragment.class.getName() + ".id"; // Pk do Processo
+    private MenuItem mMenuItemAdd;
 
     public static DocumentoListaFragment newInstance(Long id) {
         DocumentoListaFragment fragment = new DocumentoListaFragment();
@@ -104,6 +118,8 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_documento_lista, menu);
+        mMenuItemAdd = menu.findItem(R.id.action_add);
+        mMenuItemAdd.setVisible(false);
     }
 
     @Override
@@ -144,7 +160,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
         DocumentoListAdapter.Group group = mGroups.get(groupPosition);
         DocumentoModel documentoModel = group.getAt(childPosition);
-        DocumentoEdicaoFragment fragment = DocumentoEdicaoFragment.newInstance(documentoModel.id);
+        DocumentoDetalheFragment fragment = DocumentoDetalheFragment.newInstance(documentoModel.id);
         FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
         return true;
     }
@@ -162,6 +178,27 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         });
         FragmentManager manager = getFragmentManager();
         dialog.show(manager, dialog.getClass().getSimpleName());
+    }
+
+    @OnClick(R.id.button_enviar)
+    public void onEviarClick() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.editar)
+                .setMessage(R.string.msg_enviar_processo)
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startAsyncEnviar(mId);
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startAsyncEnviar(mId);
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void deleteFiles() {
@@ -185,11 +222,20 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     }
 
     // POPULA A LISTA DE DOCUMENTOS
-    private void onAsyncDataSetCompleted(DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet) {
+    private void onAsyncDataSetCompleted(DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet) {
 
-        ProcessoLogModel meta = dataSet.meta;
-        if (meta != null) {
-            FieldUtils.setText(mPendenciaTextView, meta.observacao);
+        DocumentoMeta meta = dataSet.meta;
+        mRegra = meta.regra;
+
+        mMenuItemAdd.setVisible(false);
+        if (mRegra.podeDigitalizar) {
+            mMenuItemAdd.setVisible(true);
+        }
+
+        ProcessoLogModel log = meta.log;
+        mPendenciaTextView.setVisibility(View.GONE);
+        if (log != null) {
+            FieldUtils.setText(mPendenciaTextView, log.observacao);
             mPendenciaTextView.setVisibility(View.VISIBLE);
         }
 
@@ -218,6 +264,11 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         for (int i = 0; i < mGroups.size(); i++) {
             mListView.expandGroup(i);
         }
+
+        mEnviarFloatingActionButton.setVisibility(View.GONE);
+        if (mRegra.podeEnviar && MapUtils.isEmpty(mRegra.pendencias)) {
+            mEnviarFloatingActionButton.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onAsyncJustificarCompleted(ResultModel model) {
@@ -237,8 +288,8 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     private void startAsyncDataSet() {
         if (mId != null) {
             showProgress();
-            Observable<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>> observable = DocumentoService.Async.getDataSet(mId);
-            prepare(observable).subscribe(new Subscriber<DataSet<ArrayList<DocumentoModel>, ProcessoLogModel>>() {
+            Observable<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> observable = DocumentoService.Async.getDataSet(mId);
+            prepare(observable).subscribe(new Subscriber<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>>() {
                 @Override
                 public void onCompleted() {
                     hideProgress();
@@ -249,7 +300,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                     handle(e);
                 }
                 @Override
-                public void onNext(DataSet<ArrayList<DocumentoModel>, ProcessoLogModel> dataSet) {
+                public void onNext(DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet) {
                     hideProgress();
                     onAsyncDataSetCompleted(dataSet);
                 }
@@ -305,5 +356,29 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                 onAsyncJustificarCompleted(model);
             }
         });
+    }
+
+    private void startAsyncEnviar(Long id) {
+        if (mId != null) {
+            showProgress();
+            Observable<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> observable = DocumentoService.Async.enviar(mId);
+            prepare(observable).subscribe(new Subscriber<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>>() {
+                @Override
+                public void onCompleted() {
+                    hideProgress();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    hideProgress();
+                    handle(e);
+                }
+                @Override
+                public void onNext(DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet) {
+                    hideProgress();
+                    Toast.makeText(getContext(), R.string.msg_processo_enviado_sucesso, Toast.LENGTH_SHORT).show();
+                    onAsyncDataSetCompleted(dataSet);
+                }
+            });
+        }
     }
 }
