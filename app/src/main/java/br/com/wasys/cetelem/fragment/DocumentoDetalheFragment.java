@@ -209,18 +209,6 @@ public class DocumentoDetalheFragment extends CetelemFragment implements ViewPag
         }
     }
 
-    private boolean hasUpload() {
-        List<ImagemModel> imagens = mImagePageAdapter.getModels();
-        if (CollectionUtils.isNotEmpty(imagens)) {
-            for (ImagemModel imagem : imagens) {
-                if (imagem.id == null) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @OnClick(R.id.button_delete)
     public void onExclirClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -288,7 +276,7 @@ public class DocumentoDetalheFragment extends CetelemFragment implements ViewPag
     private void setVisibilityActions() {
         mSalvarFloatingActionButton.setVisibility(View.GONE);
         if (BooleanUtils.isTrue(mDocumento.digitalizavel)) {
-            boolean has = hasUpload();
+            boolean has = mImagePageAdapter.hasUpload();
             if (has) {
                 mSalvarFloatingActionButton.setVisibility(View.VISIBLE);
             }

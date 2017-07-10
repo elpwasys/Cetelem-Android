@@ -1,6 +1,7 @@
 package br.com.wasys.cetelem.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -79,14 +80,21 @@ public class DigitalizacaoService extends Service {
         return null;
     }
 
-    public static boolean existsBy(String referencia, DigitalizacaoModel.Tipo tipo, DigitalizacaoModel.Status status) throws Throwable {
+    public static boolean existsBy(String referencia, DigitalizacaoModel.Tipo tipo, DigitalizacaoModel.Status... status) throws Throwable {
         Realm realm = Realm.getDefaultInstance();
         try {
-            RealmResults<Digitalizacao> errors = realm.where(Digitalizacao.class)
+            RealmQuery<Digitalizacao> query = realm.where(Digitalizacao.class)
                     .equalTo("tipo", tipo.name())
-                    .equalTo("status", status.name())
-                    .equalTo("referencia", referencia)
-                    .findAll();
+                    .equalTo("referencia", referencia);
+            if (ArrayUtils.isNotEmpty(status)) {
+                for (int i = 0; i < status.length; i++) {
+                    if (i > 0) {
+                        query.or();
+                    }
+                    query.equalTo("status", status[i].name());
+                }
+            }
+            RealmResults<Digitalizacao> errors = query.findAll();
             return !errors.isEmpty();
         } finally {
             realm.close();
@@ -116,7 +124,7 @@ public class DigitalizacaoService extends Service {
 
     public static class Async {
 
-        public static Observable<Boolean> existsBy(final String referencia, final DigitalizacaoModel.Tipo tipo, final DigitalizacaoModel.Status status) {
+        public static Observable<Boolean> existsBy(final String referencia, final DigitalizacaoModel.Tipo tipo, final DigitalizacaoModel.Status... status) {
             return Observable.create(new Observable.OnSubscribe<Boolean>() {
                 @Override
                 public void call(Subscriber<? super Boolean> subscriber) {

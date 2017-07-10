@@ -26,8 +26,11 @@ public interface DocumentoEndpoint {
     @POST("documento/justificar")
     Call<ResultModel> justificar(@Body JustificativaModel justificativaModel);
 
-    @GET("documento/enviar/{id}")
-    Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> enviar(@Path("id") Long id);
+    @GET("documento/enviar/{id}/{aguardar}")
+    Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> enviar(@Path("id") Long id, @Path("aguardar") Boolean aguardar);
+
+    @GET("documento/reenviar/{id}/{aguardar}")
+    Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> reenviar(@Path("id") Long id, @Path("aguardar") Boolean aguardar);
 
     @GET("documento/dataset/{id}")
     Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> getDataSet(@Path("id") Long id);

@@ -62,6 +62,7 @@ public class ProcessoDetalheFragment extends CetelemFragment {
     @BindView(R.id.button_editar) FloatingActionButton mEditarFloatingActionButton;
     @BindView(R.id.button_salvar) FloatingActionButton mSalvarFloatingActionButton;
     @BindView(R.id.button_enviar) FloatingActionButton mEnviarFloatingActionButton;
+    @BindView(R.id.button_reenviar) FloatingActionButton mReenviarFloatingActionButton;
 
     private Long mId;
     private ProcessoModel mProcesso;
@@ -158,18 +159,38 @@ public class ProcessoDetalheFragment extends CetelemFragment {
     @OnClick(R.id.button_enviar)
     public void onEviarClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.editar)
+                .setTitle(R.string.enviar)
                 .setMessage(R.string.msg_enviar_processo)
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                    startAsyncEnviar(mId);
+                        startAsyncEnviar(mId);
                     }
                 })
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        startAsyncEnviar(mId);
+
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    @OnClick(R.id.button_reenviar)
+    public void onReeviarClick() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.reenviar)
+                .setMessage(R.string.msg_reenviar_processo)
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startAsyncReenviar(mId);
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -202,11 +223,11 @@ public class ProcessoDetalheFragment extends CetelemFragment {
         FragmentUtils.replace(getActivity(), R.id.content_main, fragment, fragment.getClass().getSimpleName());
     }
 
-    private void reenviar() {
+    private void enviar() {
         String referencia = String.valueOf(mId);
         DigitalizacaoModel.Tipo tipo = DigitalizacaoModel.Tipo.TIPIFICACAO;
         startDigitalizacaoService(getContext(), tipo, referencia);
-        Toast.makeText(getContext(), R.string.msg_processo_reenviado, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), R.string.msg_processo_enviado, Toast.LENGTH_LONG).show();
     }
 
     private boolean validate() {
@@ -286,6 +307,11 @@ public class ProcessoDetalheFragment extends CetelemFragment {
         if (mRegra.podeEnviar && MapUtils.isEmpty(mRegra.pendencias)) {
             mEnviarFloatingActionButton.setVisibility(View.VISIBLE);
         }
+
+        mReenviarFloatingActionButton.setVisibility(View.GONE);
+        if (mRegra.podeResponderPendencia && MapUtils.isEmpty(mRegra.pendencias)) {
+            mReenviarFloatingActionButton.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onAsyncCheckErrorCompleted(Boolean exists) {
@@ -311,7 +337,7 @@ public class ProcessoDetalheFragment extends CetelemFragment {
                 @Override
                 public void onReenviar(boolean answer) {
                     if (answer) {
-                        reenviar();
+                        enviar();
                     }
                 }
             });
@@ -363,6 +389,28 @@ public class ProcessoDetalheFragment extends CetelemFragment {
             public void onNext(DataSet<ProcessoModel, ProcessoRegraModel> dataSet) {
                 hideProgress();
                 Toast.makeText(getContext(), R.string.msg_processo_enviado_sucesso, Toast.LENGTH_SHORT).show();
+                onAsyncEdicaoCompleted(dataSet);
+            }
+        });
+    }
+
+    private void startAsyncReenviar(Long id) {
+        showProgress();
+        Observable<DataSet<ProcessoModel, ProcessoRegraModel>> observable = ProcessoService.Async.reenviar(id);
+        prepare(observable).subscribe(new Subscriber<DataSet<ProcessoModel, ProcessoRegraModel>>() {
+            @Override
+            public void onCompleted() {
+                hideProgress();
+            }
+            @Override
+            public void onError(Throwable e) {
+                hideProgress();
+                handle(e);
+            }
+            @Override
+            public void onNext(DataSet<ProcessoModel, ProcessoRegraModel> dataSet) {
+                hideProgress();
+                Toast.makeText(getContext(), R.string.msg_processo_reenviado_sucesso, Toast.LENGTH_SHORT).show();
                 onAsyncEdicaoCompleted(dataSet);
             }
         });

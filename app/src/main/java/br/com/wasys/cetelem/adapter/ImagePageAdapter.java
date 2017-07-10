@@ -3,6 +3,8 @@ package br.com.wasys.cetelem.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.view.ViewGroup;
 
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -40,8 +42,44 @@ public class ImagePageAdapter extends FragmentStatePagerAdapter {
         return CollectionUtils.size(mModels);
     }
 
+    public boolean isEmpty() {
+        return CollectionUtils.isEmpty(mModels);
+    }
+
+    public boolean isNotEmpty() {
+        return !isEmpty();
+    }
+
     public List<ImagemModel> getModels() {
         return mModels;
+    }
+
+    private boolean isUplad(ImagemModel model) {
+        return model.id == null;
+    }
+
+    public boolean hasUpload() {
+        if (CollectionUtils.isNotEmpty(mModels)) {
+            for (ImagemModel model : mModels) {
+                if (isUplad(model)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<ImagemModel> getUploads() {
+        if (hasUpload()) {
+            List<ImagemModel> uploads = new ArrayList<>();
+            for (ImagemModel model : mModels) {
+                if (isUplad(model)) {
+                    uploads.add(model);
+                }
+            }
+            return uploads;
+        }
+        return null;
     }
 
     public ImagemModel getModelAt(int position) {

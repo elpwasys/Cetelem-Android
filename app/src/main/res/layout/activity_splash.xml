@@ -15,5 +15,6 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_logo"
         android:adjustViewBounds="true"
-        />
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

@@ -38,8 +38,23 @@ public class ProcessoService extends Service {
 
 
     public static DataSet<ProcessoModel, ProcessoRegraModel> enviar(Long id) throws Throwable {
+        // VERIFICA SE EXISTE IMAGENS SENDO DIGITALIZADAS
+        String referencia = String.valueOf(id);
+        boolean aguardar = DigitalizacaoService.existsBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ENVIANDO, DigitalizacaoModel.Status.AGUARDANDO);
+        // ENVIA SOLICITACAO PARA O SERVIDOR
         ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
-        Call<DataSet<ProcessoModel, ProcessoRegraModel>> call = endpoint.enviar(id);
+        Call<DataSet<ProcessoModel, ProcessoRegraModel>> call = endpoint.enviar(id, aguardar);
+        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = Endpoint.execute(call);
+        return dataSet;
+    }
+
+    public static DataSet<ProcessoModel, ProcessoRegraModel> reenviar(Long id) throws Throwable {
+        // VERIFICA SE EXISTE IMAGENS SENDO DIGITALIZADAS
+        String referencia = String.valueOf(id);
+        boolean aguardar = DigitalizacaoService.existsBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ENVIANDO, DigitalizacaoModel.Status.AGUARDANDO);
+        // ENVIA SOLICITACAO PARA O SERVIDOR
+        ProcessoEndpoint endpoint = Endpoint.create(ProcessoEndpoint.class);
+        Call<DataSet<ProcessoModel, ProcessoRegraModel>> call = endpoint.reenviar(id, aguardar);
         DataSet<ProcessoModel, ProcessoRegraModel> dataSet = Endpoint.execute(call);
         return dataSet;
     }
@@ -88,6 +103,20 @@ public class ProcessoService extends Service {
                 public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoRegraModel>> subscriber) {
                     try {
                         DataSet<ProcessoModel, ProcessoRegraModel> dataSet = ProcessoService.enviar(id);
+                        subscriber.onNext(dataSet);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+        public static Observable<DataSet<ProcessoModel, ProcessoRegraModel>> reenviar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ProcessoModel, ProcessoRegraModel>>() {
+                @Override
+                public void call(Subscriber<? super DataSet<ProcessoModel, ProcessoRegraModel>> subscriber) {
+                    try {
+                        DataSet<ProcessoModel, ProcessoRegraModel> dataSet = ProcessoService.reenviar(id);
                         subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {

@@ -6,6 +6,7 @@ import br.com.wasys.cetelem.dataset.DataSet;
 import br.com.wasys.cetelem.dataset.meta.DocumentoMeta;
 import br.com.wasys.cetelem.endpoint.DocumentoEndpoint;
 import br.com.wasys.cetelem.endpoint.Endpoint;
+import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.DocumentoModel;
 import br.com.wasys.cetelem.model.JustificativaModel;
 import br.com.wasys.cetelem.model.ResultModel;
@@ -33,10 +34,24 @@ public class DocumentoService extends Service {
         return model;
     }
 
-
     public static DataSet<ArrayList<DocumentoModel>, DocumentoMeta> enviar(Long id) throws Throwable {
+        // VERIFICA SE EXISTE IMAGENS SENDO DIGITALIZADAS
+        String referencia = String.valueOf(id);
+        boolean aguardar = DigitalizacaoService.existsBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ENVIANDO, DigitalizacaoModel.Status.AGUARDANDO);
+        // ENVIA SOLICITACAO PARA O SERVIDOR
         DocumentoEndpoint endpoint = Endpoint.create(DocumentoEndpoint.class);
-        Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> call = endpoint.enviar(id);
+        Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> call = endpoint.enviar(id, aguardar);
+        DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet = Endpoint.execute(call);
+        return dataSet;
+    }
+
+    public static DataSet<ArrayList<DocumentoModel>, DocumentoMeta> reenviar(Long id) throws Throwable {
+        // VERIFICA SE EXISTE IMAGENS SENDO DIGITALIZADAS
+        String referencia = String.valueOf(id);
+        boolean aguardar = DigitalizacaoService.existsBy(referencia, DigitalizacaoModel.Tipo.TIPIFICACAO, DigitalizacaoModel.Status.ENVIANDO, DigitalizacaoModel.Status.AGUARDANDO);
+        // ENVIA SOLICITACAO PARA O SERVIDOR
+        DocumentoEndpoint endpoint = Endpoint.create(DocumentoEndpoint.class);
+        Call<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> call = endpoint.reenviar(id, aguardar);
         DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet = Endpoint.execute(call);
         return dataSet;
     }
@@ -83,6 +98,20 @@ public class DocumentoService extends Service {
                 public void call(Subscriber<? super DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> subscriber) {
                     try {
                         DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet = DocumentoService.enviar(id);
+                        subscriber.onNext(dataSet);
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+        public static Observable<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> reenviar(final Long id) {
+            return Observable.create(new Observable.OnSubscribe<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>>() {
+                @Override
+                public void call(Subscriber<? super DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> subscriber) {
+                    try {
+                        DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet = DocumentoService.reenviar(id);
                         subscriber.onNext(dataSet);
                         subscriber.onCompleted();
                     } catch (Throwable e) {

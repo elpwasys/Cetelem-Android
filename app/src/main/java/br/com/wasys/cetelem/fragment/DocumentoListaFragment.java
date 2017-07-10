@@ -67,6 +67,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     @BindView(R.id.list_view) ExpandableListView mListView;
     @BindView(R.id.text_pendencia) TextView mPendenciaTextView;
     @BindView(R.id.button_enviar) FloatingActionButton mEnviarFloatingActionButton;
+    @BindView(R.id.button_reenviar) FloatingActionButton mReenviarFloatingActionButton;
 
     private Long mId;
 
@@ -183,7 +184,7 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
     @OnClick(R.id.button_enviar)
     public void onEviarClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.editar)
+                .setTitle(R.string.enviar)
                 .setMessage(R.string.msg_enviar_processo)
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     @Override
@@ -194,7 +195,26 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        startAsyncEnviar(mId);
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    @OnClick(R.id.button_reenviar)
+    public void onReeviarClick() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.reenviar)
+                .setMessage(R.string.msg_reenviar_processo)
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startAsyncReenviar(mId);
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -268,6 +288,11 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
         mEnviarFloatingActionButton.setVisibility(View.GONE);
         if (mRegra.podeEnviar && MapUtils.isEmpty(mRegra.pendencias)) {
             mEnviarFloatingActionButton.setVisibility(View.VISIBLE);
+        }
+
+        mReenviarFloatingActionButton.setVisibility(View.GONE);
+        if (mRegra.podeResponderPendencia && MapUtils.isEmpty(mRegra.pendencias)) {
+            mReenviarFloatingActionButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -376,6 +401,30 @@ public class DocumentoListaFragment extends CetelemFragment implements Expandabl
                 public void onNext(DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet) {
                     hideProgress();
                     Toast.makeText(getContext(), R.string.msg_processo_enviado_sucesso, Toast.LENGTH_SHORT).show();
+                    onAsyncDataSetCompleted(dataSet);
+                }
+            });
+        }
+    }
+
+    private void startAsyncReenviar(Long id) {
+        if (mId != null) {
+            showProgress();
+            Observable<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>> observable = DocumentoService.Async.reenviar(mId);
+            prepare(observable).subscribe(new Subscriber<DataSet<ArrayList<DocumentoModel>, DocumentoMeta>>() {
+                @Override
+                public void onCompleted() {
+                    hideProgress();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    hideProgress();
+                    handle(e);
+                }
+                @Override
+                public void onNext(DataSet<ArrayList<DocumentoModel>, DocumentoMeta> dataSet) {
+                    hideProgress();
+                    Toast.makeText(getContext(), R.string.msg_processo_reenviado_sucesso, Toast.LENGTH_SHORT).show();
                     onAsyncDataSetCompleted(dataSet);
                 }
             });

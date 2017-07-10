@@ -25,8 +25,11 @@ public interface ProcessoEndpoint {
     @GET("processo/editar/{id}")
     Call<DataSet<ProcessoModel, ProcessoRegraModel>> editar(@Path("id") Long id);
 
-    @GET("processo/enviar/{id}")
-    Call<DataSet<ProcessoModel, ProcessoRegraModel>> enviar(@Path("id") Long id);
+    @GET("processo/enviar/{id}/{aguardar}")
+    Call<DataSet<ProcessoModel, ProcessoRegraModel>> enviar(@Path("id") Long id, @Path("aguardar") Boolean aguardar);
+
+    @GET("processo/reenviar/{id}/{aguardar}")
+    Call<DataSet<ProcessoModel, ProcessoRegraModel>> reenviar(@Path("id") Long id, @Path("aguardar") Boolean aguardar);
 
     @GET("processo/tipo/dataset/{id}")
     Call<DataSet<TipoProcessoModel, TipoProcessoMeta>> getTipoDataSet(@Path("id") Long id);

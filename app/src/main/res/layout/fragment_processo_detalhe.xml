@@ -106,6 +106,21 @@
             app:backgroundTint="@color/colorPrimary"/>
 
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/button_reenviar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginTop="@dimen/fab_margin"
+            android:layout_marginRight="24dp"
+            android:layout_marginBottom="88dp"
+            android:src="@drawable/ic_send"
+            android:tint="@android:color/white"
+            android:clickable="true"
+            android:visibility="gone"
+            app:fabSize="mini"
+            app:backgroundTint="@color/colorPrimary"/>
+
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_editar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

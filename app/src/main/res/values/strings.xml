@@ -92,6 +92,7 @@
     <string name="mensagem">Mensagem</string>
     <string name="documento">Documento</string>
     <string name="reenviar">Reenviar</string>
+    <string name="msg_processo_enviado">Processo enviado com sucesso</string>
     <string name="msg_processo_reenviado">Processo reenviado com sucesso</string>
     <string name="enviado">Enviado</string>
     <string name="tipificacao">Tipificação</string>
@@ -109,7 +110,10 @@
     <string name="msg_sem_info_digitalizacao">Não há informações de digitalização</string>
     <string name="msg_editar_processo">Os documentos terão de ser analisados novamente.\nTem certeza que deseja prosseguir?</string>
     <string name="editar">Editar</string>
-    <string name="msg_enviar_processo">Deseja enviar este processo para análise?</string>
+    <string name="msg_enviar_processo">Deseja enviar este processo?</string>
     <string name="msg_processo_enviado_sucesso">Processo enviado com sucesso</string>
+    <string name="msg_processo_reenviado_sucesso">Processo reenviado com sucesso</string>
+    <string name="msg_reenviar_processo">Deseja reenviar esse processo?</string>
+    <string name="enviar">Enviar</string>
 
 </resources>

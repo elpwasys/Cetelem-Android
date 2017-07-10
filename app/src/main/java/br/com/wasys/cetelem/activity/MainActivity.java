@@ -39,7 +39,7 @@ public class MainActivity extends CetelemActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -61,10 +61,10 @@ public class MainActivity extends CetelemActivity
             FieldUtils.setText(emailTextView, email);
         }
 
-        //drawer.openDrawer(GravityCompat.START);
-
         HomeFragment fragment = HomeFragment.newInstance();
         FragmentUtils.replace(this, R.id.content_main, fragment, fragment.getClass().getSimpleName());
+
+        drawer.openDrawer(GravityCompat.START);
     }
 
     @Override

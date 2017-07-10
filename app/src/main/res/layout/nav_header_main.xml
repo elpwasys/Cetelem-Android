@@ -16,9 +16,10 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:layout_gravity="left"
-        app:srcCompat="@drawable/ic_header" />
+        app:srcCompat="@drawable/ic_logo" />
 
     <TextView
         android:id="@+id/usuario_nome"
@@ -29,7 +30,7 @@
 
     <TextView
         android:id="@+id/usuario_email"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
 </LinearLayout>

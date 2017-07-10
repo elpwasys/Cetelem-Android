@@ -50,4 +50,19 @@
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/ic_send" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/button_reenviar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:clickable="true"
+        android:visibility="gone"
+        app:backgroundTint="@color/colorPrimary"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/ic_send" />
+
+
 </android.support.constraint.ConstraintLayout>

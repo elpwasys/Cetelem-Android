@@ -13,7 +13,9 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -31,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import br.com.wasys.cetelem.BuildConfig;
 import br.com.wasys.cetelem.Permission;
@@ -50,8 +53,6 @@ public class DocumentScannerActivity extends CetelemActivity implements ViewPage
     private int mPosition = -1;
 
     private ArrayList<Uri> mUris;
-    private ArrayList<Uri> mPassedUris;
-    private ArrayList<Uri> mMarkedDeleteUris;
     private ArrayList<TipoDocumentoModel> mDocumentos;
 
     private ImagePageAdapter mImagePageAdapter;
@@ -98,24 +99,18 @@ public class DocumentScannerActivity extends CetelemActivity implements ViewPage
         ButterKnife.bind(this);
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
+        mUris = new ArrayList<>();
         if (extras.containsKey(KEY_URI)) {
             mUris = intent.getParcelableArrayListExtra(KEY_URI);
-        } else {
-            mUris = new ArrayList<>();
         }
-        if (extras.containsKey(KEY_DOCUMENTOS)) {
-            mDocumentos = (ArrayList<TipoDocumentoModel>) extras.getSerializable(KEY_DOCUMENTOS);
-        }
-        mPassedUris = new ArrayList<>(mUris);
-        mMarkedDeleteUris = new ArrayList<>();
         mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), ImagemModel.from(mUris));
         int pixels = AndroidUtils.toPixels(this, 16f);
         mViewPager.setPageMargin(pixels);
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setAdapter(mImagePageAdapter);
         mCirclePageIndicator.setViewPager(mViewPager);
-        toggleButtonsVisible();
-        if (CollectionUtils.isEmpty(mUris)) {
+        setVisibiltyActionButtons();
+        if (mImagePageAdapter.isEmpty()) {
             openScanner();
         }
     }
@@ -154,19 +149,17 @@ public class DocumentScannerActivity extends CetelemActivity implements ViewPage
 
     @OnClick(R.id.button_check)
     public void onCheckButtonClick() {
-        if (CollectionUtils.isEmpty(mUris) && CollectionUtils.isEmpty(mMarkedDeleteUris)) {
-            onCancel();
+        List<ImagemModel> models = mImagePageAdapter.getModels();
+        if (CollectionUtils.isEmpty(models)) {
+            cancelar();
         } else {
-            if (CollectionUtils.isNotEmpty(mMarkedDeleteUris)) {
-                for (Uri uri : mMarkedDeleteUris) {
-                    File file = new File(uri.getPath());
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
+            ArrayList<Uri> uris = new ArrayList<>(models.size());
+            for (ImagemModel model : models) {
+                Uri uri = Uri.parse(model.path);
+                uris.add(uri);
             }
             Intent intent = getIntent();
-            intent.putParcelableArrayListExtra(MediaStore.EXTRA_OUTPUT, mUris);
+            intent.putParcelableArrayListExtra(MediaStore.EXTRA_OUTPUT, uris);
             setResult(RESULT_OK, intent);
             finish();
         }
@@ -174,66 +167,62 @@ public class DocumentScannerActivity extends CetelemActivity implements ViewPage
 
     @OnClick(R.id.button_delete)
     public void onDeleteButtonClick() {
-        if (CollectionUtils.isNotEmpty(mUris)) {
-            if (mPosition < mUris.size()) {
-                Uri uri = mUris.get(mPosition);
-                delete(uri);
+        if (mImagePageAdapter.isNotEmpty()) {
+            ImagemModel model = mImagePageAdapter.getModelAt(mPosition);
+            if (model != null) {
+                delete(model);
+                List<ImagemModel> models = mImagePageAdapter.getModels();
+                models.remove(model);
+                mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), models);
+                mViewPager.setAdapter(mImagePageAdapter);
+                mCirclePageIndicator.notifyDataSetChanged();
             }
         }
+        setVisibiltyActionButtons();
     }
 
     private void onCancel() {
-        deleteFiles();
+        deleteUploads();
+        cancelar();
+    }
+
+    private void cancelar() {
         setResult(RESULT_CANCELED);
         finish();
     }
 
-    private void delete(final Uri uri) {
-        if (mPassedUris.contains(uri)) {
-            mMarkedDeleteUris.add(uri);
-        } else {
-            File file = new File(uri.getPath());
-            if (file.exists()) {
-                file.delete();
-            }
-        }
-        mUris.remove(uri);
-        notifyDataSetChanged();
+    private void add(Uri uri) {
+        ImagemModel model = ImagemModel.from(uri);
+        mImagePageAdapter.addModel(model);
+        setVisibiltyActionButtons();
     }
 
-    private void toggleButtonsVisible() {
-        if (CollectionUtils.isEmpty(mUris)) {
-            mDeleteFloatingButton.setVisibility(View.GONE);
-            if (CollectionUtils.isEmpty(mMarkedDeleteUris)) {
-                mCheckFloatingButton.setVisibility(View.GONE);
-            }
-        } else {
+    private void delete(ImagemModel model) {
+        File file = new File(model.path);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private void setVisibiltyActionButtons() {
+        mCheckFloatingButton.setVisibility(View.GONE);
+        mDeleteFloatingButton.setVisibility(View.GONE);
+        if (mImagePageAdapter.isNotEmpty()) {
             mCheckFloatingButton.setVisibility(View.VISIBLE);
             mDeleteFloatingButton.setVisibility(View.VISIBLE);
         }
     }
 
-    private void deleteFiles() {
-        if (CollectionUtils.isNotEmpty(mUris)) {
-            for (Uri uri : mUris) {
-                if (!mPassedUris.contains(uri)) {
-                    File file = new File(uri.getPath());
-                    if (file.exists()) {
-                        file.delete();
-                    }
+    private void deleteUploads() {
+        List<ImagemModel> uploads = mImagePageAdapter.getUploads();
+        if (CollectionUtils.isNotEmpty(uploads)) {
+            for (ImagemModel upload : uploads) {
+                File file = new File(upload.path);
+                if (file.exists()) {
+                    file.delete();
                 }
             }
         }
-    }
-
-    private void notifyDataSetChanged() {
-        mImagePageAdapter = new ImagePageAdapter(getSupportFragmentManager(), ImagemModel.from(mUris));
-        mViewPager.setAdapter(mImagePageAdapter);
-        if (CollectionUtils.isNotEmpty(mUris)) {
-            mViewPager.setCurrentItem(mUris.size() - 1);
-        }
-        mCirclePageIndicator.notifyDataSetChanged();
-        toggleButtonsVisible();
     }
 
     private void openInfo() {
@@ -288,15 +277,14 @@ public class DocumentScannerActivity extends CetelemActivity implements ViewPage
             switch (requestCode) {
                 case REQUEST_IMAGE_CAPTURE: {
                     Uri uri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
-                    mUris.add(uri);
-                    notifyDataSetChanged();
-                    handler.postDelayed(scanRunnable, 500);
+                    add(uri);
+                    handler.postDelayed(scanRunnable, 250);
                     break;
                 }
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
-            if (CollectionUtils.isEmpty(mUris)) {
+            if (mImagePageAdapter.isEmpty()) {
                 onCancel();
             }
         }
