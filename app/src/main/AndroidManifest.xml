@@ -44,7 +44,7 @@
             android:configChanges="keyboardHidden"
             android:screenOrientation="portrait" />
 
-        <service android:name=".background.DigitalizacaoService" />
+        ////
 
     </application>
 

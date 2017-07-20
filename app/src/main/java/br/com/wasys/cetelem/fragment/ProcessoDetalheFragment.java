@@ -31,8 +31,8 @@ import br.com.wasys.cetelem.dialog.DigitalizacaoDialog;
 import br.com.wasys.cetelem.model.CampoGrupoModel;
 import br.com.wasys.cetelem.model.DigitalizacaoModel;
 import br.com.wasys.cetelem.model.ProcessoModel;
-import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.model.ProcessoRegraModel;
+import br.com.wasys.cetelem.model.TipoProcessoModel;
 import br.com.wasys.cetelem.service.DigitalizacaoService;
 import br.com.wasys.cetelem.service.ProcessoService;
 import br.com.wasys.cetelem.widget.AppGroupInputLayout;
@@ -68,8 +68,6 @@ public class ProcessoDetalheFragment extends CetelemFragment {
     private ProcessoModel mProcesso;
     private ProcessoRegraModel mRegra;
     private DigitalizacaoModel mDigitalizacao;
-
-    private Snackbar mSnackbar;
 
     private static final String KEY_ID = ProcessoDetalheFragment.class.getName() + ".id";
 
