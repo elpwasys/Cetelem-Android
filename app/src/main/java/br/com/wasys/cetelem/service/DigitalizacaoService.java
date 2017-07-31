@@ -94,8 +94,8 @@ public class DigitalizacaoService extends Service {
                     query.equalTo("status", status[i].name());
                 }
             }
-            RealmResults<Digitalizacao> errors = query.findAll();
-            return !errors.isEmpty();
+            RealmResults<Digitalizacao> results = query.findAll();
+            return !results.isEmpty();
         } finally {
             realm.close();
         }

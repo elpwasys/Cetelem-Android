@@ -11,37 +11,31 @@ android {
             storePassword 'schwartz'
         }
     }
+    def properties = { k -> "\"${project.properties.get(k)}\"" }
     compileSdkVersion 23
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "br.com.wasys.cetelem"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 2
-        versionName "1.0"
+        versionCode 3
+        versionName "1.1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        // build config fields
+        buildConfigField('String', 'URL_REST', 'BuildConfig.URL_BASE + "/rest/"')
     }
     buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+            buildConfigField('String', 'URL_BASE', properties('debug.server.url'))
+        }
         release {
             minifyEnabled false
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField 'String', 'BASE_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/\""
-            buildConfigField 'String', 'DIGITALIZACAO_DOCUMENTO_PATH', "\"digitalizacao/documento/upload\""
-            buildConfigField 'String', 'DIGITALIZACAO_TIPIFICACAO_PATH', "\"digitalizacao/tipificacao/upload\""
+            buildConfigField('String', 'URL_BASE', properties('release.server.url'))
             signingConfig signingConfigs.release
-        }
-        debug {
-            minifyEnabled false
-            /*buildConfigField 'String', 'BASE_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://wasys-ocr2.wasys.com.br:85/cetelem/\""*/
-            buildConfigField 'String', 'BASE_URL', "\"http://192.168.100.4:8080/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://192.168.100.4:8080/cetelem/\""
-            /*buildConfigField 'String', 'BASE_URL', "\"http://192.168.100.15:8080/cetelem/rest/\""
-            buildConfigField 'String', 'SERVER_URL', "\"http://192.168.100.15:8080/cetelem/\""*/
-            buildConfigField 'String', 'DIGITALIZACAO_DOCUMENTO_PATH', "\"digitalizacao/documento/upload\""
-            buildConfigField 'String', 'DIGITALIZACAO_TIPIFICACAO_PATH', "\"digitalizacao/tipificacao/upload\""
         }
     }
     packagingOptions {

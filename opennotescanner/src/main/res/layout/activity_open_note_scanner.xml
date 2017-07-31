@@ -197,6 +197,18 @@
                     android:focusableInTouchMode="false"
                     android:tint="#a0f0a0"/>
 
+                <ImageView
+                    android:id="@+id/autoModeButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_focus_on"
+                    android:gravity="center"
+                    android:enabled="true"
+                    android:focusableInTouchMode="false"
+                    android:tint="#ffffff"/>
+
                 <!--<ImageView
                     android:id="@+id/filterModeButton"
                     android:layout_width="0dp"

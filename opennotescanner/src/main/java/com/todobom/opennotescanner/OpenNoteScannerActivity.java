@@ -231,6 +231,17 @@ public class OpenNoteScannerActivity extends AppCompatActivity
             }
         });
 
+        final ImageView autoModeButton = (ImageView) findViewById(R.id.autoModeButton);
+        autoModeButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                automatic = !automatic;
+                ((ImageView)v).setColorFilter(automatic ? 0xFFFFFFFF : 0xFFA0F0A0);
+
+            }
+        });
+
         final ImageView colorModeButton = (ImageView) findViewById(R.id.colorModeButton);
         colorModeButton.setOnClickListener(new View.OnClickListener() {
 
@@ -490,6 +501,7 @@ public class OpenNoteScannerActivity extends AppCompatActivity
     private SurfaceView mSurfaceView;
 
     private boolean scanClicked = false;
+    private boolean automatic = true;
 
     private boolean colorMode = false;
 
@@ -756,7 +768,7 @@ public class OpenNoteScannerActivity extends AppCompatActivity
 
             yuv.release();
 
-            sendImageProcessorMessage("previewFrame", new PreviewFrame( mat, autoMode, !(autoMode || scanClicked) ));
+            sendImageProcessorMessage("previewFrame", new PreviewFrame( mat, autoMode, !(autoMode || scanClicked || automatic) ));
         }
 
     }
@@ -815,6 +827,7 @@ public class OpenNoteScannerActivity extends AppCompatActivity
         setImageProcessorBusy(true);
         sendImageProcessorMessage("pictureTaken", mat);
 
+        automatic = false;
         scanClicked = false;
         safeToTakePicture = true;
 

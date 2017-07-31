@@ -64,7 +64,7 @@ public class ImagemService extends Service {
         model.cache = true;
         if (!file.exists()) {
             Map<String, String> headers = Endpoint.getHeaders();
-            String baseURL = BuildConfig.SERVER_URL + dirs + "/";
+            String baseURL = BuildConfig.URL_BASE + "/" + dirs + "/";
             ImagemEndpoint endpoint = br.com.wasys.library.http.Endpoint.create(ImagemEndpoint.class, baseURL, headers);
             Call<ResponseBody> call = endpoint.carregar(fileName);
             ResponseBody responseBody = br.com.wasys.library.http.Endpoint.execute(call);
